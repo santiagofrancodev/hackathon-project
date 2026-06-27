@@ -4,7 +4,6 @@ FROM php:8.2-cli-alpine
 # Install system dependencies
 RUN apk add --no-cache \
     libpng-dev \
-    libonig-dev \
     libxml2-dev \
     zip \
     unzip \
@@ -29,8 +28,5 @@ RUN composer install --no-dev --optimize-autoloader
 # Set permissions
 RUN chmod -R 775 storage bootstrap/cache
 
-# Expose port
-EXPOSE $PORT
-
-# Start command
-CMD ["sh", "start.sh"]
+# Start command - port is set at runtime
+CMD ["bash", "start.sh"]
