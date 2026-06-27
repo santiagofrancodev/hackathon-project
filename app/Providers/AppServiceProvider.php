@@ -14,6 +14,11 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Ensure SQLite database file exists (required for Railway/demo deploy)
+        if (config('database.default') === 'sqlite' && ! file_exists(database_path('database.sqlite'))) {
+            touch(database_path('database.sqlite'));
+        }
+
         Gate::policy(Assessment::class, AssessmentPolicy::class);
 
         // Global auth gate helper for Blade

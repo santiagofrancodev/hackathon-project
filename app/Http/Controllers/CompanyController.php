@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreCompanyRequest;
 use App\Models\Company;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class CompanyController extends Controller
@@ -20,14 +20,9 @@ class CompanyController extends Controller
         return view('company.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreCompanyRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'nit' => 'required|string|max:50|unique:companies',
-            'sector' => 'nullable|string|max:255',
-            'size' => 'nullable|in:small,medium,large',
-        ]);
+        $validated = $request->validated();
 
         Company::create(array_merge($validated, [
             'user_id' => Auth::id(),

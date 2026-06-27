@@ -56,43 +56,59 @@ class AIService
         $nivel = $score >= 80 ? 'ALTO' : ($score >= 60 ? 'MODERADO' : ($score >= 40 ? 'BAJO' : 'CRÍTICO'));
 
         $prompt = <<<PROMPT
-Eres un consultor senior experto en la Ley 1581 de 2012 de Colombia. Redacta un INFORME EJECUTIVO DE DIAGNÓSTICO completo y profesional en español neutro.
+Eres un consultor senior experto en la Ley 1581 de 2012 de Colombia.
+Tu tarea es redactar un INFORME DE DIAGNÓSTICO en español neutro, con un tono
+**cálido, cercano y motivador**, como si estuvieras hablando directamente con
+el dueño de la PYME. Nada de jerga técnica innecesaria.
 
-## DATOS DE LA EMPRESA
-- Nombre: {$empresa}
-- Sector: {$sector}
-- Tamaño: {$tamano}
+Usá el siguiente formato exacto. Cada sección va con ## y un texto amigable:
 
-## RESULTADO GLOBAL
-- Puntaje total: {$score}% — Nivel {$nivel}
+## Diagnóstico general
 
-## DESGLOSE POR BLOQUE
+(Empezá con un tono cercano, tipo "Hola! Veamos cómo le fue a tu empresa..."
+o similar. Explicá el score de forma clara. Destacá qué bloque le fue mejor
+y cuál peor. Constructivo, no alarmista.)
+
+## Riesgos legales que deberías conocer
+
+(Explicá los riesgos de forma clara pero sin asustar. Mencioná las multas
+de hasta 2.000 SMMLV como algo importante de conocer. Relacioná cada riesgo
+con las brechas concretas de la empresa.)
+
+## Tu plan de acción prioritario
+
+(Ordená las acciones por prioridad. Usá este formato:
+
+**Prioridad ALTA**
+• *Área*: [nombre] — *Acción*: [qué hacer] — *Impacto*: [qué mejora]
+
+**Prioridad MEDIA**
+• ...)
+
+## Próximos pasos: tu hoja de ruta
+
+(Recomendación amigable de qué hacer en 30, 60 y 90 días. Cerra con un
+mensaje motivador: "La protección de datos no es solo una obligación legal,
+es una forma de demostrarle a tus clientes que su información está segura".)
+
+--- DATOS PARA EL INFORME ---
+Empresa: {$empresa} | Sector: {$sector} | Tamaño: {$tamano}
+Puntaje: {$score}% (Nivel {$nivel})
+
+Desglose por bloque:
 {$bloques}
 
-## BRECHAS IDENTIFICADAS (areas de mejora)
+Brechas encontradas:
 {$gapsDetallados}
 
-## RECOMENDACIONES POR PRIORIDAD
+Recomendaciones:
 {$recomendaciones}
 
----
-
-Genera un INFORME EJECUTIVO estructurado EXACTAMENTE con estas secciones (usa los titulos textuales sin numeracion):
-
-=== DIAGNÓSTICO GENERAL ===
-Analiza el puntaje total ({$score}%) en el contexto del sector {$sector}. Explica que significa este nivel de cumplimiento para una empresa de este tamaño y rubro. Menciona los bloques mejor y peor evaluados.
-
-=== RIESGOS LEGALES IDENTIFICADOS ===
-Lista y explica los principales riesgos legales y sanciones economicas potenciales segun la Ley 1581 (multas SIC hasta 2.000 SMMLV). Relaciona cada riesgo con las brechas especificas encontradas.
-
-=== PRIORIDADES DE ACCIÓN ===
-Ordena las acciones recomendadas por criticidad (ALTA/MEDIA/BAJA). Para cada prioridad, incluye: el area problematica, la accion concreta y el impacto esperado.
-
-=== PRÓXIMOS PASOS ===
-Hoja de ruta recomendada: acciones a 30, 60 y 90 dias. Un mensaje final motivador sobre la importancia de la proteccion de datos.
+IMPORTANTE: NO uses === ni símbolos raros. Usá ## para los títulos.
+Tono cálido, cercano y constructivo, como un consultor amigo.
 PROMPT;
 
-        return $this->call($prompt, 1200);
+        return $this->call($prompt, 1500);
     }
 
     private function call(string $prompt, int $maxTokens = 300): string

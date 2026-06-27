@@ -1,7 +1,6 @@
-# Production Dockerfile for Laravel
 FROM php:8.2-cli-alpine
 
-# Install bash and system dependencies
+# System dependencies
 RUN apk add --no-cache \
     bash \
     libpng-dev \
@@ -9,25 +8,31 @@ RUN apk add --no-cache \
     zip \
     unzip \
     postgresql-dev \
-    oniguruma-dev
+    oniguruma-dev \
+    nodejs \
+    npm \
+    freetype-dev \
+    libjpeg-turbo-dev
 
-# Install PHP extensions
-RUN docker-php-ext-install pdo pgsql pdo_pgsql mbstring exif pcntl bcmath
+# PHP extensions (GD needed for dompdf)
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo pgsql pdo_pgsql mbstring exif pcntl bcmath gd
 
-# Set working directory
 WORKDIR /var/www/html
 
-# Copy composer
+# Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copy application
+# Copy app
 COPY . .
 
-# Install dependencies
-RUN composer install --no-dev --optimize-autoloader
+# PHP dependencies
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# Set permissions
+# Build frontend assets (Vite)
+RUN npm ci && npm run build && rm -rf node_modules
+
+# Storage permissions
 RUN chmod -R 775 storage bootstrap/cache
 
-# Start command - port is set at runtime
 CMD ["bash", "/var/www/html/start.sh"]

@@ -1,0 +1,20 @@
+# DigitalOcean App Platform configuration
+name: cumplia
+services:
+  - name: web
+    source_dir: /
+    github:
+      repo: santiagofrancodev/hackathon-project
+      branch: main
+    run_command: bash start.sh
+    build_command: composer install --no-dev --optimize-autoloader
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      DB_CONNECTION: pgsql
+    routes:
+      - path: /
+    health_check:
+      http_path: /
+    post_deploy:
+      # Migrations run via start.sh, no duplicate needed

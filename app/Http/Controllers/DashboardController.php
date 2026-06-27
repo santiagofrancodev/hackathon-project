@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Assessment;
+use App\Models\AuditorRequest;
 use App\Models\Company;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,10 +15,22 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
+        $auditorRequests = collect();
+        $auditors = collect();
+
         // ---- Admin: view all ----
         if ($user->isAdmin()) {
             $companies = Company::withCount('assessments')->get();
             $companyIds = $companies->pluck('id');
+
+            // Pending auditor requests
+            $auditorRequests = AuditorRequest::with(['company', 'assessment', 'requester'])
+                ->where('status', 'pending')
+                ->latest()
+                ->get();
+
+            // Available auditors for assignment
+            $auditors = User::where('role', 'auditor')->get();
 
             $assessmentsQuery = Assessment::with(['company', 'user'])
                 ->whereIn('company_id', $companyIds);
@@ -90,7 +104,8 @@ class DashboardController extends Controller
         $scoreHistory = $completed->take(10)->sortByDesc('created_at')->values();
 
         return view('dashboard', compact(
-            'companies', 'allAssessments', 'stats', 'scoreHistory', 'showEvaluator'
+            'companies', 'allAssessments', 'stats', 'scoreHistory', 'showEvaluator',
+            'auditorRequests', 'auditors'
         ));
     }
 }

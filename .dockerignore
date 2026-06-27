@@ -7,4 +7,3 @@ bootstrap/cache/*.cache
 .env
 .phpunit.result.cache
 .php-cs-fixer.cache
-composer.lock

@@ -63,6 +63,106 @@
                 </div>
             </div>
 
+            {{-- Auditor Requests — only for admin --}}
+            @if(auth()->user()->isAdmin() && $auditorRequests->isNotEmpty())
+                <div class="bg-card-bg overflow-hidden shadow-sm border border-border-light sm:rounded-lg mb-6">
+                    <div class="p-5 border-b border-border-light flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 bg-low-text/10 rounded-lg flex items-center justify-center shrink-0">
+                                <x-icon name="user-group" class="w-5 h-5 text-low-text" />
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-semibold text-body-text">Solicitudes de Auditoría</h3>
+                                <p class="text-xs text-muted-text">{{ $auditorRequests->count() }} pendiente(s) de asignación</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-border-light">
+                            <thead class="bg-bg-page">
+                                <tr>
+                                    <th class="px-5 py-3 text-left text-xs font-medium text-muted-text uppercase">Empresa</th>
+                                    <th class="px-5 py-3 text-left text-xs font-medium text-muted-text uppercase">Score</th>
+                                    <th class="px-5 py-3 text-left text-xs font-medium text-muted-text uppercase">Solicitante</th>
+                                    <th class="px-5 py-3 text-left text-xs font-medium text-muted-text uppercase">Fecha</th>
+                                    <th class="px-5 py-3 text-left text-xs font-medium text-muted-text uppercase">Notas</th>
+                                    <th class="px-5 py-3 text-right text-xs font-medium text-muted-text uppercase">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-card-bg divide-y divide-border-light">
+                                @foreach($auditorRequests as $req)
+                                    <tr class="hover:bg-bg-page/50 transition">
+                                        <td class="px-5 py-4 whitespace-nowrap">
+                                            <p class="text-sm font-medium text-body-text">{{ $req->company->name }}</p>
+                                        </td>
+                                        <td class="px-5 py-4 whitespace-nowrap">
+                                            <span class="inline-flex items-center px-2 py-0.5 text-xs font-bold rounded-full
+                                                {{ $req->assessment->score >= 70 ? 'bg-high-bg text-high-text' :
+                                                   ($req->assessment->score >= 40 ? 'bg-medium-bg text-medium-text' : 'bg-low-bg text-low-text') }}">
+                                                {{ $req->assessment->score }}%
+                                            </span>
+                                        </td>
+                                        <td class="px-5 py-4 whitespace-nowrap">
+                                            <p class="text-sm text-muted-text">{{ $req->requester->name }}</p>
+                                            <p class="text-xs text-muted-text/70">{{ $req->requester->email }}</p>
+                                        </td>
+                                        <td class="px-5 py-4 whitespace-nowrap">
+                                            <p class="text-sm text-muted-text">{{ $req->created_at->format('d/m/Y') }}</p>
+                                        </td>
+                                        <td class="px-5 py-4 max-w-xs">
+                                            <p class="text-sm text-muted-text truncate">{{ $req->notes ?? '—' }}</p>
+                                        </td>
+                                        <td class="px-5 py-4 whitespace-nowrap text-right">
+                                            @if($auditors->isNotEmpty())
+                                                <div x-data="{ open: false, selected: '' }">
+                                                    <button type="button" @@click="open = true"
+                                                            class="inline-flex items-center gap-1 text-sm font-medium text-primary hover:text-primary-hover transition">
+                                                        Asignar
+                                                        <x-icon name="chevron-right" class="w-3.5 h-3.5" />
+                                                    </button>
+
+                                                    {{-- Assign modal --}}
+                                                    <div x-show="open" class="fixed inset-0 z-50 flex items-center justify-center" x-cloak>
+                                                        <div class="fixed inset-0 bg-black/40" @@click="open = false"></div>
+                                                        <div class="relative bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4 z-10">
+                                                            <h3 class="text-base font-semibold text-body-text mb-1">Asignar Auditor</h3>
+                                                            <p class="text-sm text-muted-text mb-4">Seleccioná un auditor para {{ $req->company->name }}</p>
+
+                                                            <form action="{{ route('auditor-request.assign', $req) }}" method="POST">
+                                                                @csrf
+                                                                <select name="auditor_id" required
+                                                                        class="w-full text-sm border-border-light rounded-lg focus:border-primary focus:ring-primary mb-4">
+                                                                    <option value="">Seleccionar auditor...</option>
+                                                                    @foreach($auditors as $auditor)
+                                                                        <option value="{{ $auditor->id }}">{{ $auditor->name }} ({{ $auditor->email }})</option>
+                                                                    @endforeach
+                                                                </select>
+                                                                <div class="flex items-center justify-end gap-3">
+                                                                    <button type="button" @@click="open = false"
+                                                                            class="px-3 py-2 text-sm text-muted-text hover:text-body-text transition">
+                                                                        Cancelar
+                                                                    </button>
+                                                                    <button type="submit"
+                                                                            class="px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-hover transition">
+                                                                        Asignar
+                                                                    </button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @else
+                                                <span class="text-xs text-muted-text">Sin auditores</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            @endif
+
             {{-- Quick actions bar --}}
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
                 <div>

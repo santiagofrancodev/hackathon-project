@@ -14,9 +14,12 @@ services:
       - key: APP_KEY
         value: base64:8D/ylE9iSVovvCK03VFXpZjy/dQeDVwA7vSlM5GDiKc=
       - key: DB_CONNECTION
-        value: sqlite
+        value: pgsql
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cumplia-db
+          property: connectionString
       # Set these manually in Render Dashboard → Environment:
-      # APP_KEY   → run locally: php artisan key:generate --show
       # OPENAI_API_KEY
       # GOOGLE_CLIENT_ID
       # GOOGLE_CLIENT_SECRET

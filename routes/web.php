@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuditorRequestController;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\DashboardController;
@@ -27,6 +28,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/diagnostic/{assessment}', [DiagnosticController::class, 'show'])->name('diagnostic.show');
     Route::post('/diagnostic/{assessment}', [DiagnosticController::class, 'submit'])->name('diagnostic.submit');
     Route::get('/diagnostic/{assessment}/results', [DiagnosticController::class, 'results'])->name('diagnostic.results');
+    Route::get('/diagnostic/{assessment}/pdf', [DiagnosticController::class, 'exportPdf'])->name('diagnostic.pdf');
+    Route::post('/diagnostic/{assessment}/email', [DiagnosticController::class, 'sendEmail'])->name('diagnostic.email');
+
+    // Auditor Requests
+    Route::post('/auditor-requests', [AuditorRequestController::class, 'store'])->name('auditor-request.store');
+    Route::post('/auditor-requests/{auditorRequest}/assign', [AuditorRequestController::class, 'assign'])
+        ->name('auditor-request.assign');
 });
 
 Route::middleware('auth')->group(function () {

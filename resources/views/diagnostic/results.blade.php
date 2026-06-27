@@ -84,7 +84,10 @@
                         <template x-if="summary && !loading">
                             <div class="text-sm text-body-text leading-relaxed" x-html="
                                 summary
-                                    .replace(/=== (.+?) ===/g, '<h4 class=\'text-xs font-semibold uppercase tracking-widest text-primary mt-5 mb-2 first:mt-0\'>$1</h4>')
+                                    .replace(/## (.+)/g, '<h4 class=\'text-sm font-bold text-primary mt-5 mb-2 first:mt-0\'>$1</h4>')
+                                    .replace(/=== (.+?) ===/g, '<h4 class=\'text-sm font-bold text-primary mt-5 mb-2 first:mt-0\'>$1</h4>')
+                                    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                                    .replace(/•/g, '&bull;')
                                     .replace(/\n/g, '<br>')
                             "></div>
                         </template>
@@ -220,12 +223,97 @@
                 </div>
             @endif
 
+            {{-- Auditor Request CTA --}}
+            @if($assessment->score < 70 || $assessment->company->isPro())
+                <div class="bg-card-bg overflow-hidden shadow-sm border border-border-light sm:rounded-lg mb-6"
+                     x-data="{ showForm: false, notes: '' }">
+                    <div class="p-6">
+                        @php $existingRequest = $assessment->auditorRequest; @endphp
+                        @if($existingRequest && $existingRequest->status === 'assigned')
+                            <div class="flex items-center gap-4 p-4 bg-high-bg border border-high-text/30 rounded-lg">
+                                <div class="w-10 h-10 bg-high-text/10 rounded-full flex items-center justify-center shrink-0">
+                                    <x-icon name="user-check" class="w-5 h-5 text-high-text" />
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold text-body-text">Auditor asignado</p>
+                                    <p class="text-sm text-muted-text">{{ $existingRequest->assignedAuditor?->name ?? 'Pendiente' }}</p>
+                                </div>
+                            </div>
+                        @elseif($existingRequest && $existingRequest->status === 'pending')
+                            <div class="flex items-center gap-4 p-4 bg-medium-bg border border-medium-text/30 rounded-lg">
+                                <div class="w-10 h-10 bg-medium-text/10 rounded-full flex items-center justify-center shrink-0">
+                                    <x-icon name="clock" class="w-5 h-5 text-medium-text" />
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold text-body-text">Solicitud enviada</p>
+                                    <p class="text-sm text-muted-text">Estamos revisando tu solicitud. Pronto te asignaremos un auditor.</p>
+                                </div>
+                            </div>
+                        @else
+                            <div class="flex items-start gap-4">
+                                <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
+                                    <x-icon name="user-group" class="w-5 h-5 text-primary" />
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-semibold text-body-text">¿Necesitás ayuda para implementar estas mejoras?</p>
+                                    <p class="text-xs text-muted-text mt-1">Un auditor especializado en Ley 1581 puede guiarte en el proceso de adecuación. Te asignaremos un profesional certificado.</p>
+
+                                    <div x-show="!showForm" class="mt-3">
+                                        <button type="button" @@click="showForm = true"
+                                                class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-hover transition">
+                                            <x-icon name="user-plus" class="w-4 h-4" />
+                                            Solicitar Asignación de Auditor
+                                        </button>
+                                    </div>
+
+                                    <div x-show="showForm" class="mt-3" x-cloak>
+                                        <form action="{{ route('auditor-request.store') }}" method="POST">
+                                            @csrf
+                                            <input type="hidden" name="assessment_id" value="{{ $assessment->id }}">
+                                            <textarea name="notes" x-model="notes" rows="2"
+                                                      class="w-full text-sm border-border-light rounded-lg resize-none focus:border-primary focus:ring-primary mb-3"
+                                                      placeholder="Contanos brevemente qué aspectos necesitás reforzar... (opcional)"></textarea>
+                                            <div class="flex items-center gap-2">
+                                                <button type="submit"
+                                                        class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-hover transition">
+                                                    <x-icon name="paper-airplane" class="w-4 h-4" />
+                                                    Enviar solicitud
+                                                </button>
+                                                <button type="button" @@click="showForm = false"
+                                                        class="px-3 py-2 text-sm text-muted-text hover:text-body-text transition">
+                                                    Cancelar
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @endif
+
             <!-- Actions -->
-            <div class="flex items-center justify-between">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <a href="{{ route('dashboard') }}" class="text-sm text-primary hover:text-primary-hover">&larr; Volver al dashboard</a>
-                <a href="{{ route('diagnostic.index') }}" class="px-6 py-2 bg-primary text-white font-semibold rounded-md hover:bg-primary-hover">
-                    Nuevo autodiagnóstico
-                </a>
+                <div class="flex items-center gap-3">
+                    <a href="{{ route('diagnostic.pdf', $assessment) }}"
+                       class="inline-flex items-center gap-2 px-4 py-2 border border-border-light text-body-text text-sm font-medium rounded-lg hover:bg-bg-page transition">
+                        <x-icon name="clipboard-document" class="w-4 h-4" />
+                        Descargar PDF
+                    </a>
+                    <form action="{{ route('diagnostic.email', $assessment) }}" method="POST" class="inline">
+                        @csrf
+                        <button type="submit"
+                                class="inline-flex items-center gap-2 px-4 py-2 border border-border-light text-body-text text-sm font-medium rounded-lg hover:bg-bg-page transition">
+                            <x-icon name="envelope" class="w-4 h-4" />
+                            Enviar por email
+                        </button>
+                    </form>
+                    <a href="{{ route('diagnostic.index') }}" class="px-6 py-2 bg-primary text-white font-semibold rounded-md hover:bg-primary-hover">
+                        Nuevo autodiagnóstico
+                    </a>
+                </div>
             </div>
         </div>
     </div>

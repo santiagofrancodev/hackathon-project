@@ -537,6 +537,96 @@ Crear ruta y vista de administración (solo rol `admin`) en `/admin`:
 - Asignar auditores a empresas.
 - Ver todas las evaluaciones.
 
+#### 2.5-bis — Solicitud y asignación de auditores
+
+> Esta feature cierra el ciclo del rol `auditor` y diferencia claramente al `user` free
+> (autoservicio, sin auditor) del `evaluator` pro (con acceso a auditoría profesional).
+> Es también el gancho B2B del pitch: "cuando la empresa quiere validación externa, la
+> plataforma conecta al solicitante con un consultor certificado".
+
+**Flujo completo:**
+
+```
+1. User/Evaluator completa diagnóstico → ve resultados
+2. CTA "Solicitar Auditor" (aparece cuando score < 70% O siempre en plan pro)
+3. Se crea auditor_request { status: pending }
+4. Admin recibe email + ve badge en su dashboard
+5. Admin abre panel "Solicitudes" → selecciona un auditor disponible → asigna
+6. Al asignar: se inserta en pivot auditor_company + auditor_request.status → assigned
+7. Auditor recibe email de asignación
+8. Empresa recibe email de confirmación con nombre del auditor asignado
+```
+
+**Migración `create_auditor_requests_table`:**
+
+```php
+Schema::create('auditor_requests', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('assessment_id')->constrained()->cascadeOnDelete();
+    $table->foreignId('company_id')->constrained()->cascadeOnDelete();
+    $table->foreignId('requester_id')->constrained('users')->cascadeOnDelete();
+    $table->foreignId('assigned_auditor_id')->nullable()->constrained('users')->nullOnDelete();
+    $table->enum('status', ['pending', 'assigned', 'completed', 'cancelled'])->default('pending');
+    $table->text('notes')->nullable();
+    $table->timestamps();
+});
+```
+
+> El `assessment_id` es clave: la solicitud está atada al diagnóstico concreto, no solo
+> a la empresa. Así el auditor sabe exactamente qué revisar, y una empresa puede tener
+> múltiples solicitudes para distintos diagnósticos.
+
+**Modelo `AuditorRequest`:**
+- `belongsTo(Assessment)`, `belongsTo(Company)`, `belongsTo(User, 'requester_id')`,
+  `belongsTo(User, 'assigned_auditor_id')`
+- `Assessment` agrega `hasOne(AuditorRequest)` (una solicitud por diagnóstico)
+
+**Controladores necesarios:**
+
+- `AuditorRequestController::store()` — crea la solicitud, notifica al admin
+- `AuditorRequestController::assign(Request, AuditorRequest)` — solo admin; valida que el
+  usuario seleccionado sea auditor, inserta en `auditor_company`, actualiza status →
+  `assigned`, notifica auditor y empresa
+
+**Notificaciones (Laravel Notifications → canal `mail`):**
+
+| Notificación | Destinatario | Cuándo |
+|---|---|---|
+| `NewAuditorRequestNotification` | Admin | Al crear la solicitud |
+| `AuditorAssignedToAuditorNotification` | Auditor | Al ser asignado |
+| `AuditorAssignedToCompanyNotification` | User/Evaluator solicitante | Al confirmar asignación |
+
+Usar `php artisan make:notification NombreNotificacion` para cada una.
+Canal: `mail` + `database` (para el badge en el dashboard del admin).
+
+**Vistas y UI:**
+
+1. **CTA en `results.blade.php`** (debajo del Plan de Acción):
+   - Mostrar si `$assessment->score < 70` O si la empresa es `pro`
+   - Si ya existe una solicitud para este assessment: mostrar estado ("Solicitud enviada",
+     "Auditor asignado: [nombre]")
+   - Si no existe: botón "Solicitar Auditor Especializado" + campo textarea `notes` opcional
+
+2. **Panel admin — "Solicitudes de Auditoría"** (nueva sección en el dashboard del admin):
+   - Tabla: empresa, diagnóstico (fecha/score), solicitante, fecha solicitud, status badge
+   - Botón "Asignar" → modal con `<select>` de usuarios con `role = auditor`
+   - Al asignar: POST a `auditor-requests/{request}/assign`
+
+**Rutas:**
+
+```php
+Route::post('/auditor-requests', [AuditorRequestController::class, 'store'])->name('auditor-request.store');
+Route::post('/auditor-requests/{auditorRequest}/assign', [AuditorRequestController::class, 'assign'])
+    ->name('auditor-request.assign')
+    ->middleware('can:admin'); // solo admin
+```
+
+**Para el pitch (Seguridad 15% + Innovación 10%):** esta feature cierra el loop de los
+3 roles del reto con un flujo de negocio real. Muestra que la plataforma no es solo un
+formulario sino un marketplace de cumplimiento: empresa solicita → plataforma conecta →
+auditor valida. El `status` tracking (pending → assigned → completed) permite iterar
+hacia una experiencia de seguimiento completa en futuras versiones.
+
 #### 2.6 — PDF descargable
 
 Instalar:

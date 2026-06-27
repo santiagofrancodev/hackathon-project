@@ -2,14 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreAssessmentRequest;
+use App\Http\Requests\SubmitAssessmentRequest;
+use App\Mail\ReportMail;
 use App\Models\Assessment;
 use App\Models\Category;
 use App\Models\Company;
 use App\Models\Question;
 use App\Models\Recommendation;
 use App\Services\AIService;
-use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class DiagnosticController extends Controller
 {
@@ -21,11 +26,9 @@ class DiagnosticController extends Controller
         return view('diagnostic.index', compact('categories', 'companies'));
     }
 
-    public function store(Request $request)
+    public function store(StoreAssessmentRequest $request)
     {
-        $validated = $request->validate([
-            'company_id' => 'required|exists:companies,id',
-        ]);
+        $validated = $request->validated();
 
         // Ensure the company belongs to the user
         $company = Company::where('id', $validated['company_id'])
@@ -57,16 +60,11 @@ class DiagnosticController extends Controller
         return view('diagnostic.show', compact('assessment', 'categories', 'answers'));
     }
 
-    public function submit(Request $request, Assessment $assessment)
+    public function submit(SubmitAssessmentRequest $request, Assessment $assessment)
     {
         $this->authorizeAccess($assessment);
 
-        $validated = $request->validate([
-            'answers' => 'required|array',
-            'answers.*.question_id' => 'required|exists:questions,id',
-            'answers.*.answer' => 'nullable|boolean',
-            'answers.*.notes' => 'nullable|string|max:1000',
-        ]);
+        $validated = $request->validated();
 
         // Ensure at least one question was actually answered
         $hasAnyAnswer = collect($validated['answers'])->contains(fn ($a) => isset($a['answer']) && $a['answer'] !== null);
@@ -134,7 +132,7 @@ class DiagnosticController extends Controller
     {
         $this->authorizeAccess($assessment);
 
-        $assessment->load(['answers.question', 'recommendations']);
+        $assessment->load(['answers.question', 'recommendations', 'auditorRequest', 'auditorRequest.assignedAuditor']);
 
         $categories = Category::with(['questions' => function ($query) {
             $query->orderBy('sort_order');
@@ -189,6 +187,82 @@ class DiagnosticController extends Controller
         return view('diagnostic.results', compact(
             'assessment', 'categories', 'answers', 'categoryResults', 'gaps'
         ));
+    }
+
+    public function exportPdf(Assessment $assessment)
+    {
+        $this->authorizeAccess($assessment);
+
+        $assessment->load(['company', 'user', 'answers.question', 'recommendations']);
+
+        $categories = Category::with(['questions' => fn ($q) => $q->orderBy('sort_order')])
+            ->orderBy('sort_order')
+            ->get();
+
+        $answers = $assessment->answers->keyBy('question_id');
+
+        // Per-category breakdown
+        $categoryResults = [];
+        foreach ($categories as $category) {
+            $earned = 0;
+            $totalWeight = 0;
+            foreach ($category->questions as $question) {
+                if ($question->is_complementary || $question->weight === 0) {
+                    continue;
+                }
+                $totalWeight += $question->weight;
+                $answer = $answers->get($question->id);
+                if ($answer && $answer->answer) {
+                    $earned += $question->weight;
+                }
+            }
+            $categoryResults[$category->id] = [
+                'name' => $category->name,
+                'max_percentage' => $category->max_percentage,
+                'earned_percentage' => $totalWeight > 0
+                    ? round(($earned / $totalWeight) * $category->max_percentage)
+                    : 0,
+                'earned_weight' => $earned,
+                'total_weight' => $totalWeight,
+            ];
+        }
+
+        // Gaps
+        $gaps = [];
+        foreach ($categories as $category) {
+            foreach ($category->questions as $question) {
+                if ($question->is_complementary) {
+                    continue;
+                }
+                $answer = $answers->get($question->id);
+                if (! $answer || ! $answer->answer) {
+                    $gaps[] = [
+                        'category' => $category->name,
+                        'question' => $question->question_text,
+                        'help_text' => $question->help_text,
+                    ];
+                }
+            }
+        }
+
+        $pdf = Pdf::loadView('diagnostic.report', compact(
+            'assessment', 'categoryResults', 'gaps'
+        ));
+
+        $filename = 'diagnostico-'.Str::slug($assessment->company->name).'-'.$assessment->id.'.pdf';
+
+        return $pdf->download($filename);
+    }
+
+    public function sendEmail(Assessment $assessment)
+    {
+        $this->authorizeAccess($assessment);
+
+        $assessment->load(['company', 'user', 'answers.question', 'recommendations']);
+
+        Mail::to($assessment->user->email)->send(new ReportMail($assessment));
+
+        return back()->with('success', 'Informe enviado correctamente a '.$assessment->user->email);
     }
 
     private function calculateScore(Assessment $assessment): int
