@@ -1,13 +1,11 @@
 <x-guest-layout>
 <div class="text-center mb-6">
     <div class="mx-auto w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
-        <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
-        </svg>
+        <x-icon name="envelope" class="w-6 h-6 text-primary" />
     </div>
-    <h2 class="text-xl font-bold text-body-text">Verifica tu correo</h2>
+    <h2 class="text-xl font-bold text-body-text">Verifica su correo</h2>
     <p class="text-sm text-muted-text mt-2 leading-relaxed">
-        Gracias por registrarte. Antes de empezar, necesitamos que verifiques tu dirección de correo electrónico.
+        Gracias por registrarse. Antes de empezar, necesitamos que verifique su dirección de correo electrónico.
         Te enviamos un enlace de verificación. Si no lo recibiste, te podemos enviar otro.
     </p>
 </div>

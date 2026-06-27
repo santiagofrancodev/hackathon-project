@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Crear cuenta — CumplIA</title>
+    <title>Crear cuenta — CheckData AI</title>
 
     <link rel="icon" type="image/svg+xml" href="{{ asset('img/cumplia-icon.svg') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -39,11 +39,11 @@
                 {{-- Hero text --}}
                 <div class="flex-1 flex flex-col justify-center max-w-lg">
                     <h1 class="text-3xl lg:text-4xl xl:text-5xl font-extrabold leading-tight mb-4">
-                        Empieza tu diagnóstico
+                        Comience su diagnóstico
                         <br><span class="text-blue-400">en menos de 2 minutos</span>
                     </h1>
                     <p class="text-base lg:text-lg text-gray-400 leading-relaxed max-w-md">
-                        Regístrate gratis y descubre el nivel de cumplimiento de tu empresa 
+                        Regístrese gratis y descubra el nivel de cumplimiento de su empresa 
                         con la <strong class="text-white">Ley 1581 de Protección de Datos</strong> — sin costo, sin compromiso.
                     </p>
 
@@ -51,20 +51,16 @@
                     <div class="mt-10 space-y-5">
                         <div class="flex items-start gap-4">
                             <div class="w-9 h-9 bg-blue-500/15 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
-                                <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                                </svg>
+                                <x-icon name="clock" class="w-5 h-5 text-blue-400" />
                             </div>
                             <div>
                                 <p class="font-semibold text-white">Resultados inmediatos</p>
-                                <p class="text-sm text-gray-400 mt-0.5">Completa 11 preguntas y obtén tu porcentaje de cumplimiento al instante</p>
+                                <p class="text-sm text-gray-400 mt-0.5">Complete 11 preguntas y obtenga tu porcentaje de cumplimiento al instante</p>
                             </div>
                         </div>
                         <div class="flex items-start gap-4">
                             <div class="w-9 h-9 bg-blue-500/15 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
-                                <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/>
-                                </svg>
+                                <x-icon name="lock-closed"-check class="w-5 h-5 text-blue-400" />
                             </div>
                             <div>
                                 <p class="font-semibold text-white">Sin riesgo legal</p>
@@ -73,9 +69,7 @@
                         </div>
                         <div class="flex items-start gap-4">
                             <div class="w-9 h-9 bg-blue-500/15 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
-                                <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                                </svg>
+                                <x-icon name="users" class="w-5 h-5 text-blue-400" />
                             </div>
                             <div>
                                 <p class="font-semibold text-white">Diseñado para PYMEs</p>
@@ -106,7 +100,7 @@
                 {{-- Header --}}
                 <div class="mb-8 text-center md:text-left">
                     <h2 class="text-2xl font-bold text-body-text">Crear cuenta</h2>
-                    <p class="text-sm text-muted-text mt-1">Completa tus datos para registrarte</p>
+                    <p class="text-sm text-muted-text mt-1">Complete sus datos para registrarse</p>
                 </div>
 
                 {{-- Validation Errors --}}
@@ -129,7 +123,7 @@
                         <x-input-label for="name" :value="__('Nombre completo')" />
                         <x-text-input id="name" class="block mt-1.5 w-full" type="text" name="name"
                             :value="old('name')" required autofocus autocomplete="name"
-                            placeholder="Tu nombre" />
+                            placeholder="Nombre completo" />
                     </div>
 
                     {{-- Email --}}
@@ -137,7 +131,7 @@
                         <x-input-label for="email" :value="__('Correo electrónico')" />
                         <x-text-input id="email" class="block mt-1.5 w-full" type="email" name="email"
                             :value="old('email')" required autocomplete="username"
-                            placeholder="tu@empresa.com" />
+                            placeholder="correo@empresa.com" />
                     </div>
 
                     {{-- Password --}}
@@ -154,21 +148,19 @@
                         <x-input-label for="password_confirmation" :value="__('Confirmar contraseña')" />
                         <x-text-input id="password_confirmation" class="block mt-1.5 w-full" type="password"
                             name="password_confirmation" required autocomplete="new-password"
-                            placeholder="Repite tu contraseña" />
+                            placeholder="Repita su contraseña" />
                     </div>
 
                     {{-- Submit --}}
-                    <button type="submit"
+<button type="submit"
                             class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white font-semibold rounded-lg hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition mt-6">
-                        Crear cuenta
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M5 12h14"/><path d="M12 5l7 7-7 7"/>
-                        </svg>
-                    </button>
+                            Crear cuenta
+                            <x-icon name="arrow-right" class="w-4 h-4" />
+                        </button>
 
                     {{-- Login link --}}
                     <p class="text-center text-sm text-muted-text pt-2">
-                        ¿Ya tienes cuenta?
+                        ¿Ya tiene cuenta?
                         <a href="{{ route('login') }}" class="text-primary hover:text-primary-hover font-semibold">
                             Inicia sesión
                         </a>

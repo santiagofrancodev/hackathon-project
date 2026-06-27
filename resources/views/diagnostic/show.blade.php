@@ -167,11 +167,42 @@
                             </div>
                         @endforeach
 
-                        <div class="mt-8 flex items-center justify-between border-t pt-6">
+<div class="mt-8 flex items-center justify-between border-t pt-6"
+                            x-data="{ open: false }">
                             <p class="text-sm text-muted-text">Revise bien sus respuestas antes de enviar.</p>
-                            <button type="submit" class="px-8 py-3 bg-primary text-white font-semibold rounded-md hover:bg-primary-hover" onclick="return confirm('¿Está seguro de enviar el cuestionario? No podrá modificarlo después.')">
+                            <button type="button" @click="open = true" class="px-8 py-3 bg-primary text-white font-semibold rounded-md hover:bg-primary-hover transition">
                                 Enviar autodiagnóstico
                             </button>
+
+                            {{-- Confirmation Modal --}}
+                            <div x-show="open" class="fixed inset-0 z-50 flex items-center justify-center" style="display: none;" x-cloak>
+                                {{-- Backdrop --}}
+                                <div x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-black/50 backdrop-blur-sm" @click="open = false"></div>
+                                {{-- Modal card --}}
+                                <div x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95 translate-y-4" x-transition:enter-end="opacity-100 scale-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100 translate-y-0" x-transition:leave-end="opacity-0 scale-95 translate-y-4" class="relative z-10 bg-card-bg border border-border-light rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4">
+                                    <div class="text-center">
+                                        <div class="mx-auto w-12 h-12 bg-medium-bg rounded-xl flex items-center justify-center mb-4">
+                                            <x-icons.exclamation-triangle class="w-6 h-6 text-medium-text" />
+                                        </div>
+                                        <h3 class="text-lg font-bold text-body-text mb-2">Confirmar envío</h3>
+                                        <p class="text-sm text-muted-text mb-6">
+                                            ¿Está seguro de enviar el cuestionario? No podrá modificarlo después.
+                                        </p>
+                                        <div class="flex items-center gap-3 justify-center">
+                                            <button type="button" @click="open = false" class="px-6 py-2.5 border border-border-light text-body-text font-medium rounded-lg hover:bg-bg-page transition text-sm">
+                                                Cancelar
+                                            </button>
+<button type="button" @click="document.getElementById('diagnosticForm').submit()" class="px-6 py-2.5 bg-primary text-white font-semibold rounded-lg hover:bg-primary-hover transition text-sm">
+                                                        Confirmar envío
+                                                    </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </x-app-layout>

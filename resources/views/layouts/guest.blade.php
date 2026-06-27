@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'CumplIA') }}</title>
+        <title>{{ config('app.name', 'CheckData AI') }}</title>
 
         <link rel="icon" type="image/svg+xml" href="{{ asset('img/cumplia-icon.svg') }}">
         <link rel="preconnect" href="https://fonts.googleapis.com">

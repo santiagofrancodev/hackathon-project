@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Iniciar sesión — CumplIA</title>
+    <title>Iniciar sesión — CheckData AI</title>
 
     <link rel="icon" type="image/svg+xml" href="{{ asset('img/cumplia-icon.svg') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -52,9 +52,7 @@
                     <div class="mt-10 space-y-5">
                         <div class="flex items-start gap-4">
                             <div class="w-9 h-9 bg-blue-500/15 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
-                                <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
-                                </svg>
+                                <x-icon name="shield-check" class="w-5 h-5 text-blue-400" />
                             </div>
                             <div>
                                 <p class="font-semibold text-white">Diagnóstico preciso</p>
@@ -63,9 +61,7 @@
                         </div>
                         <div class="flex items-start gap-4">
                             <div class="w-9 h-9 bg-blue-500/15 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
-                                <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-                                </svg>
+                                <x-icon name="bolt" class="w-5 h-5 text-blue-400" />
                             </div>
                             <div>
                                 <p class="font-semibold text-white">Recomendaciones con IA</p>
@@ -74,9 +70,7 @@
                         </div>
                         <div class="flex items-start gap-4">
                             <div class="w-9 h-9 bg-blue-500/15 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
-                                <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                                </svg>
+                                <x-icon name="lock-closed" class="w-5 h-5 text-blue-400" />
                             </div>
                             <div>
                                 <p class="font-semibold text-white">Cumplimiento normativo</p>
@@ -107,7 +101,7 @@
                 {{-- Header --}}
                 <div class="mb-8 text-center md:text-left">
                     <h2 class="text-2xl font-bold text-body-text">Iniciar sesión</h2>
-                    <p class="text-sm text-muted-text mt-1">Ingresa tus credenciales para continuar</p>
+                    <p class="text-sm text-muted-text mt-1">Ingrese sus credenciales para continuar</p>
                 </div>
 
                 {{-- Session Status --}}
@@ -133,7 +127,7 @@
                         <x-input-label for="email" :value="__('Correo electrónico')" />
                         <x-text-input id="email" class="block mt-1.5 w-full" type="email" name="email"
                             :value="old('email')" required autofocus autocomplete="username"
-                            placeholder="tu@empresa.com" />
+                            placeholder="correo@empresa.com" />
                     </div>
 
                     {{-- Password --}}
@@ -143,7 +137,7 @@
                             @if (Route::has('password.request'))
                                 <a class="text-xs text-primary hover:text-primary-hover font-medium"
                                    href="{{ route('password.request') }}">
-                                    ¿Olvidaste tu contraseña?
+                                    ¿Olvidó su contraseña?
                                 </a>
                             @endif
                         </div>
@@ -163,19 +157,17 @@
                     </div>
 
                     {{-- Submit --}}
-                    <button type="submit"
-                            class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white font-semibold rounded-lg hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition">
+<button type="submit"
+                        class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white font-semibold rounded-lg hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition">
                         Iniciar sesión
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M5 12h14"/><path d="M12 5l7 7-7 7"/>
-                        </svg>
+                        <x-icon name="arrow-right" class="w-4 h-4" />
                     </button>
 
                     {{-- Register link --}}
                     <p class="text-center text-sm text-muted-text pt-2">
-                        ¿No tienes cuenta?
+                        ¿No tiene cuenta?
                         <a href="{{ route('register') }}" class="text-primary hover:text-primary-hover font-semibold">
-                            Regístrate aquí
+                            Regístrese aquí
                         </a>
                     </p>
                 </form>

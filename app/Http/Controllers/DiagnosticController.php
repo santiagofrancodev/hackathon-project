@@ -44,7 +44,7 @@ class DiagnosticController extends Controller
     {
         $this->authorizeAccess($assessment);
 
-        $assessment->load('answers');
+        $assessment->load(['answers', 'company']);
 
         $categories = Category::with(['questions' => function ($query) {
             $query->orderBy('sort_order');
@@ -62,7 +62,7 @@ class DiagnosticController extends Controller
         $validated = $request->validate([
             'answers' => 'sometimes|array',
             'answers.*.question_id' => 'required|exists:questions,id',
-            'answers.*.answer' => 'required|boolean',
+            'answers.*.answer' => 'nullable|boolean',
             'answers.*.notes' => 'nullable|string|max:1000',
         ]);
 
@@ -91,7 +91,7 @@ class DiagnosticController extends Controller
             $assessment->answers()->updateOrCreate(
                 ['question_id' => $answerData['question_id']],
                 [
-                    'answer' => $answerData['answer'],
+                    'answer' => $answerData['answer'] ?? false,
                     'notes' => $answerData['notes'] ?? null,
                 ]
             );

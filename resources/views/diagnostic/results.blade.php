@@ -91,9 +91,7 @@
                                 <div class="border-l-4 border-medium-text bg-medium-bg p-4 rounded-r-lg">
                                     <div class="flex items-start">
                                         <div class="flex-shrink-0">
-                                            <svg class="h-5 w-5 text-medium-text" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                                            </svg>
+                                            <x-icon name="check-circle" class="h-5 w-5 text-medium-text" />
                                         </div>
                                         <div class="ml-3">
                                             <p class="text-sm font-medium text-body-text">{{ $gap['category'] }}</p>
@@ -108,9 +106,7 @@
                         </div>
                     @else
                         <div class="text-center py-8">
-                            <svg class="mx-auto h-12 w-12 text-high-text" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
-                            </svg>
+                            <x-icon name="check-circle" class="mx-auto h-12 w-12 text-high-text" />
                             <p class="mt-2 text-sm text-muted-text">¡No se identificaron brechas significativas!</p>
                         </div>
                     @endif

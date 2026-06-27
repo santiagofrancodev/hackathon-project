@@ -16,9 +16,7 @@
             @if($companies->isEmpty())
                 <div class="bg-card-bg overflow-hidden shadow-sm border border-border-light sm:rounded-lg">
                     <div class="p-6 text-center">
-                        <svg class="mx-auto h-16 w-16 text-muted-text" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-                        </svg>
+                        <x-icon name="exclamation-triangle" class="mx-auto h-16 w-16 text-muted-text" />
                         <h3 class="mt-4 text-lg font-medium text-body-text">No hay empresas registradas</h3>
                         <p class="mt-2 text-sm text-muted-text">Registre su empresa primero para comenzar el autodiagnóstico.</p>
                         <a href="{{ route('company.create') }}" class="mt-4 inline-flex items-center px-4 py-2 bg-primary border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-hover">
