@@ -167,10 +167,15 @@
                             </div>
                         @endforeach
 
-<div class="mt-8 flex items-center justify-between border-t pt-6"
-                            x-data="{ open: false }">
-                            <p class="text-sm text-muted-text">Revise bien sus respuestas antes de enviar.</p>
-                            <button type="button" @click="open = true" class="px-8 py-3 bg-primary text-white font-semibold rounded-md hover:bg-primary-hover transition">
+<div class="mt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between border-t pt-6 gap-4"
+                            x-data="{ open: false, showError: false }">
+                            <div>
+                                <p class="text-sm text-muted-text">Revise bien sus respuestas antes de enviar.</p>
+                                <p x-show="showError" x-cloak class="mt-1 text-xs text-low-text font-medium">
+                                    Debe responder al menos una pregunta antes de enviar.
+                                </p>
+                            </div>
+                            <button type="button" @click="if (window.checkFormAnswers()) { open = true; showError = false; } else { showError = true; }" class="px-8 py-3 bg-primary text-white font-semibold rounded-md hover:bg-primary-hover transition shrink-0">
                                 Enviar autodiagnóstico
                             </button>
 
@@ -182,7 +187,7 @@
                                 <div x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95 translate-y-4" x-transition:enter-end="opacity-100 scale-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100 translate-y-0" x-transition:leave-end="opacity-0 scale-95 translate-y-4" class="relative z-10 bg-card-bg border border-border-light rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4">
                                     <div class="text-center">
                                         <div class="mx-auto w-12 h-12 bg-medium-bg rounded-xl flex items-center justify-center mb-4">
-                                            <x-icons.exclamation-triangle class="w-6 h-6 text-medium-text" />
+                                            <x-icon name="exclamation-triangle" class="w-6 h-6 text-medium-text" />
                                         </div>
                                         <h3 class="text-lg font-bold text-body-text mb-2">Confirmar envío</h3>
                                         <p class="text-sm text-muted-text mb-6">
@@ -205,4 +210,13 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        window.checkFormAnswers = function() {
+            const radios = document.querySelectorAll('input[type=radio][name$="[answer]"]');
+            return Array.from(radios).some(function(r) { return r.checked; });
+        };
+    </script>
+    @endpush
 </x-app-layout>

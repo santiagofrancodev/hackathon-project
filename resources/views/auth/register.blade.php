@@ -60,7 +60,7 @@
                         </div>
                         <div class="flex items-start gap-4">
                             <div class="w-9 h-9 bg-blue-500/15 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
-                                <x-icon name="lock-closed"-check class="w-5 h-5 text-blue-400" />
+                                <x-icon name="shield-check" class="w-5 h-5 text-blue-400" />
                             </div>
                             <div>
                                 <p class="font-semibold text-white">Sin riesgo legal</p>

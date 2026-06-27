@@ -113,6 +113,35 @@
                 </div>
             </div>
 
+            {{-- Plan de Acción / Recommendations --}}
+            @if($assessment->relationLoaded('recommendations') && $assessment->recommendations->isNotEmpty())
+                <div class="bg-card-bg overflow-hidden shadow-sm border border-border-light sm:rounded-lg mb-6">
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold text-body-text mb-4">Plan de Acción Recomendado</h3>
+                        <div class="space-y-3">
+                            @php
+                                $sorted = $assessment->recommendations->sortBy(fn($r) => match($r->priority) { 'high' => 0, 'medium' => 1, 'low' => 2 });
+                            @endphp
+                            @foreach($sorted as $rec)
+                                <div class="flex items-start gap-3 p-3 border border-border-light rounded-lg">
+                                    <span class="shrink-0 px-2 py-1 text-xs font-bold rounded
+                                        {{ $rec->priority === 'high' ? 'bg-low-bg text-low-text' :
+                                           ($rec->priority === 'medium' ? 'bg-medium-bg text-medium-text' : 'bg-high-bg text-high-text') }}">
+                                        {{ $rec->priority === 'high' ? 'Alta' : ($rec->priority === 'medium' ? 'Media' : 'Baja') }}
+                                    </span>
+                                    <div class="flex-1">
+                                        <p class="text-sm text-body-text">{{ $rec->text }}</p>
+                                        @if($rec->origin === 'ai')
+                                            <span class="mt-1 inline-flex items-center px-1.5 py-0.5 text-xs font-medium bg-primary/10 text-primary rounded">IA</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <!-- Actions -->
             <div class="flex items-center justify-between">
                 <a href="{{ route('dashboard') }}" class="text-sm text-primary hover:text-primary-hover">&larr; Volver al dashboard</a>

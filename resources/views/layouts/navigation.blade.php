@@ -32,7 +32,7 @@
                             <div>{{ Auth::user()->name }}</div>
 
                             <div class="ms-1">
-                                <x-icons.chevron-down class="h-4 w-4" />
+                                <x-icon name="chevron-down" class="h-4 w-4" />
                             </div>
                         </button>
                     </x-slot>
@@ -57,8 +57,8 @@
             <!-- Hamburger -->
             <div class="-me-2 flex items-center sm:hidden">
                 <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-white/60 hover:text-white hover:bg-sidebar-light focus:outline-none focus:bg-sidebar-light focus:text-white transition duration-150 ease-in-out">
-                    <x-icons.menu x-show="!open" class="h-6 w-6" />
-                    <x-icons.x x-show="open" class="h-6 w-6" />
+                    <x-icon name="menu" x-show="!open" class="h-6 w-6" />
+                    <x-icon name="x" x-show="open" class="h-6 w-6" />
                 </button>
             </div>
         </div>

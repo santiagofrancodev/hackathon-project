@@ -6,6 +6,7 @@ use App\Models\Assessment;
 use App\Models\Category;
 use App\Models\Company;
 use App\Models\Question;
+use App\Models\Recommendation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -60,11 +61,17 @@ class DiagnosticController extends Controller
         $this->authorizeAccess($assessment);
 
         $validated = $request->validate([
-            'answers' => 'sometimes|array',
+            'answers' => 'required|array',
             'answers.*.question_id' => 'required|exists:questions,id',
             'answers.*.answer' => 'nullable|boolean',
             'answers.*.notes' => 'nullable|string|max:1000',
         ]);
+
+        // Ensure at least one question was actually answered
+        $hasAnyAnswer = collect($validated['answers'])->contains(fn ($a) => isset($a['answer']) && $a['answer'] !== null);
+        if (! $hasAnyAnswer) {
+            return back()->withErrors(['answers' => 'Debe responder al menos una pregunta antes de enviar el cuestionario.'])->withInput();
+        }
 
         $submittedAnswers = $validated['answers'] ?? [];
 
@@ -108,6 +115,9 @@ class DiagnosticController extends Controller
             'score' => $score,
         ]);
 
+        // Generate rule-based recommendations for gaps
+        $this->generateRecommendations($assessment);
+
         return redirect()->route('diagnostic.results', $assessment)
             ->with('success', 'Autodiagnóstico completado. Este es tu resultado.');
     }
@@ -116,7 +126,7 @@ class DiagnosticController extends Controller
     {
         $this->authorizeAccess($assessment);
 
-        $assessment->load('answers.question');
+        $assessment->load(['answers.question', 'recommendations']);
 
         $categories = Category::with(['questions' => function ($query) {
             $query->orderBy('sort_order');
@@ -197,6 +207,42 @@ class DiagnosticController extends Controller
         }
 
         return (int) round(min($totalEarnedPercentage, 100));
+    }
+
+    private function generateRecommendations(Assessment $assessment): void
+    {
+        $answers = $assessment->answers()->with('question')->get();
+        $recommendationTexts = config('recommendations.by_question', []);
+
+        foreach ($answers as $answer) {
+            $question = $answer->question;
+
+            // Only generate for negative answers on countable questions
+            if ($answer->answer || $question->is_complementary || $question->weight === 0) {
+                continue;
+            }
+
+            // Determine priority based on weight
+            $priority = match (true) {
+                $question->weight >= 12 => 'high',
+                $question->weight >= 8 => 'medium',
+                default => 'low',
+            };
+
+            // Get recommendation text from config, or generate a default
+            $text = $recommendationTexts[$question->id] ?? sprintf(
+                'Revise e implemente medidas para abordar: %s',
+                $question->question_text
+            );
+
+            Recommendation::create([
+                'assessment_id' => $assessment->id,
+                'question_id' => $question->id,
+                'text' => $text,
+                'priority' => $priority,
+                'origin' => 'rule',
+            ]);
+        }
     }
 
     private function authorizeAccess(Assessment $assessment): void
