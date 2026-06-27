@@ -43,6 +43,7 @@ return [
 
     'openai' => [
         'api_key' => env('OPENAI_API_KEY'),
+        'api_key_fallback' => env('OPENAI_API_KEY_FALLBACK'),
         'model' => env('OPENAI_MODEL', 'gpt-4o-mini'),
     ],
 

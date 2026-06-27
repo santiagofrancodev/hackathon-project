@@ -14,8 +14,31 @@
                         <p class="text-sm text-muted-text">Responda cada pregunta según corresponda. Las preguntas complementarias no afectan el puntaje.</p>
                     </div>
 
-                    <form action="{{ route('diagnostic.submit', $assessment) }}" method="POST" id="diagnosticForm"
-                          x-data="{ aiQuestionId: null, aiLoading: false, aiText: '', aiOpen: false }">
+                     <form action="{{ route('diagnostic.submit', $assessment) }}" method="POST" id="diagnosticForm"
+                           x-data="{
+                               aiQuestionId: null, aiLoading: false, aiText: '', aiError: '', aiOpen: false,
+                               explicar(id) {
+                                   this.aiQuestionId = id;
+                                   this.aiLoading = true;
+                                   this.aiOpen = true;
+                                   this.aiError = '';
+                                   this.aiText = '';
+                                   fetch('{{ route('ia.explicar') }}', {
+                                       method: 'POST',
+                                       headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                                       body: JSON.stringify({ question_id: id })
+                                   }).then(r => {
+                                       if (!r.ok) throw new Error('HTTP ' + r.status);
+                                       return r.json();
+                                   }).then(d => {
+                                       this.aiText = d.explicacion;
+                                   }).catch(() => {
+                                       this.aiError = 'No se pudo cargar la explicación. Intente nuevamente.';
+                                   }).finally(() => {
+                                       this.aiLoading = false;
+                                   });
+                               }
+                           }">
                         @csrf
 
                         @foreach($categories as $category)
@@ -57,7 +80,7 @@
                                                                     {{ $question->question_text }}
                                                                 </p>
                                                                 <button type="button"
-                                                                        @@click="aiQuestionId = {{ $question->id }}; aiLoading = true; aiOpen = true; fetch('{{ route('ia.explicar') }}', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }, body: JSON.stringify({ question_id: {{ $question->id }} }) }).then(r => r.json()).then(d => { aiText = d.explicacion; aiLoading = false; })"
+                                                                @@click="explicar({{ $question->id }})"
                                                                         class="shrink-0 w-5 h-5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition flex items-center justify-center"
                                                                         title="Explicar con IA">
                                                                     <span class="text-xs font-bold leading-none">?</span>
@@ -107,7 +130,7 @@
                                                                 {{ $child->question_text }}
                                                             </p>
                                                             <button type="button"
-                                                                    @@click="aiQuestionId = {{ $child->id }}; aiLoading = true; aiOpen = true; fetch('{{ route('ia.explicar') }}', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }, body: JSON.stringify({ question_id: {{ $child->id }} }) }).then(r => r.json()).then(d => { aiText = d.explicacion; aiLoading = false; })"
+                                                                    @@click="explicar({{ $child->id }})" })"
                                                                     class="shrink-0 w-5 h-5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition flex items-center justify-center"
                                                                     title="Explicar con IA">
                                                                 <span class="text-xs font-bold leading-none">?</span>
@@ -154,7 +177,7 @@
                                                                 {{ $question->question_text }}
                                                             </p>
                                                             <button type="button"
-                                                                    @@click="aiQuestionId = {{ $question->id }}; aiLoading = true; aiOpen = true; fetch('{{ route('ia.explicar') }}', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }, body: JSON.stringify({ question_id: {{ $question->id }} }) }).then(r => r.json()).then(d => { aiText = d.explicacion; aiLoading = false; })"
+                                                                    @@click="explicar({{ $question->id }})"
                                                                     class="shrink-0 w-5 h-5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition flex items-center justify-center"
                                                                     title="Explicar con IA">
                                                                 <span class="text-xs font-bold leading-none">?</span>
@@ -252,7 +275,15 @@
                                             </svg>
                                         </div>
                                     </template>
-                                    <template x-if="!aiLoading && aiText">
+                                    <template x-if="!aiLoading && aiError">
+                                        <div class="text-center py-6">
+                                            <p class="text-sm text-low-text" x-text="aiError"></p>
+                                            <button type="button" @@click="explicar(aiQuestionId)" class="mt-3 text-sm text-primary hover:text-primary-hover font-medium">
+                                                Reintentar
+                                            </button>
+                                        </div>
+                                    </template>
+                                    <template x-if="!aiLoading && !aiError && aiText">
                                         <p class="text-sm text-body-text leading-relaxed" x-text="aiText"></p>
                                     </template>
                                 </div>

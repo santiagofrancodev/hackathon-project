@@ -54,20 +54,26 @@
             @if($assessment->company->isPro())
                 <div class="bg-card-bg overflow-hidden shadow-sm border border-border-light sm:rounded-lg mb-6"
                      x-data="{
-                         loading: false,
-                         summary: {{ $assessment->ai_summary ? json_encode($assessment->ai_summary) : 'null' }},
-                         generate() {
-                             this.loading = true;
-                             fetch('{{ route('ia.informe') }}', {
-                                 method: 'POST',
-                                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                                 body: JSON.stringify({ assessment_id: {{ $assessment->id }} })
-                             })
-                             .then(r => r.json())
-                             .then(d => { this.summary = d.summary; this.loading = false; })
-                             .catch(() => { this.loading = false; });
-                         }
-                     }">
+                          loading: false, error: '',
+                          summary: {{ $assessment->ai_summary ? json_encode($assessment->ai_summary) : 'null' }},
+                          generate() {
+                              this.loading = true;
+                              this.error = '';
+                              this.summary = null;
+                              fetch('{{ route('ia.informe') }}', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                                  body: JSON.stringify({ assessment_id: {{ $assessment->id }} })
+                              })
+                              .then(r => {
+                                  if (!r.ok) throw new Error('HTTP ' + r.status);
+                                  return r.json();
+                              })
+                              .then(d => { this.summary = d.summary; })
+                              .catch(() => { this.error = 'No se pudo generar el informe. Reintentá más tarde.'; })
+                              .finally(() => { this.loading = false; });
+                          }
+                      }">
                     <div class="p-6">
                         <div class="flex items-center gap-3 mb-5">
                             <div class="w-9 h-9 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
@@ -100,6 +106,16 @@
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
                                 Generando informe ejecutivo con IA experta en Ley 1581...
+                            </div>
+                        </template>
+
+                        {{-- Error --}}
+                        <template x-if="!loading && error">
+                            <div class="text-center py-6">
+                                <p class="text-sm text-low-text" x-text="error"></p>
+                                <button type="button" @@click="generate()" class="mt-3 text-sm text-primary hover:text-primary-hover font-medium">
+                                    Reintentar
+                                </button>
                             </div>
                         </template>
 

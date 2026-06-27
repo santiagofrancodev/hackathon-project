@@ -2,24 +2,29 @@
 
 namespace App\Services;
 
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class AIService
 {
     private string $apiKey;
 
+    private string $apiKeyFallback;
+
     private string $model;
 
     public function __construct()
     {
-        $this->apiKey = config('services.openai.api_key');
+        $this->apiKey = config('services.openai.api_key', '');
+        $this->apiKeyFallback = config('services.openai.api_key_fallback', '');
         $this->model = config('services.openai.model', 'gpt-4o-mini');
     }
 
     public function explicarPregunta(string $preguntaTexto): string
     {
-        $prompt = "Eres un experto en la Ley 1581 de 2012 de Colombia (protección de datos personales). 
-        Explica en lenguaje simple y amigable, en máximo 3 oraciones, qué significa esta pregunta 
+        $prompt = "Eres un experto en la Ley 1581 de 2012 de Colombia (protección de datos personales).
+        Explica en lenguaje simple y amigable, en máximo 3 oraciones, qué significa esta pregunta
         de autodiagnóstico para una pyme colombiana: \"{$preguntaTexto}\"";
 
         return $this->call($prompt);
@@ -27,8 +32,8 @@ class AIService
 
     public function generarRecomendacionIA(string $preguntaTexto, string $empresa): string
     {
-        $prompt = "Eres un consultor de protección de datos colombiano. 
-        La empresa '{$empresa}' respondió negativamente a: '{$preguntaTexto}'. 
+        $prompt = "Eres un consultor de protección de datos colombiano.
+        La empresa '{$empresa}' respondió negativamente a: '{$preguntaTexto}'.
         Da una recomendación concreta, práctica y accionable en máximo 2 oraciones.";
 
         return $this->call($prompt);
@@ -113,27 +118,47 @@ PROMPT;
 
     private function call(string $prompt, int $maxTokens = 300): string
     {
-        if (empty($this->apiKey)) {
+        $keys = array_filter([$this->apiKey, $this->apiKeyFallback]);
+
+        if (empty($keys)) {
             return 'Configure la clave de API en el archivo .env para usar esta función.';
         }
 
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer '.$this->apiKey,
-            'Content-Type' => 'application/json',
-        ])->timeout(30)->post('https://api.openai.com/v1/chat/completions', [
-            'model' => $this->model,
-            'messages' => [
-                ['role' => 'system', 'content' => 'Eres un asistente experto en la Ley 1581 de Colombia. Responde siempre en español neutro, claro y conciso.'],
-                ['role' => 'user', 'content' => $prompt],
-            ],
-            'max_tokens' => $maxTokens,
-            'temperature' => 0.7,
-        ]);
+        foreach ($keys as $key) {
+            try {
+                $response = Http::withHeaders([
+                    'Authorization' => 'Bearer '.$key,
+                    'Content-Type' => 'application/json',
+                ])->timeout(30)->post('https://api.openai.com/v1/chat/completions', [
+                    'model' => $this->model,
+                    'messages' => [
+                        ['role' => 'system', 'content' => 'Eres un asistente experto en la Ley 1581 de Colombia. Responde siempre en español neutro, claro y conciso.'],
+                        ['role' => 'user', 'content' => $prompt],
+                    ],
+                    'max_tokens' => $maxTokens,
+                    'temperature' => 0.7,
+                ]);
 
-        if ($response->failed()) {
-            return 'No se pudo generar la respuesta en este momento.';
+                if ($response->status() === 401) {
+                    Log::warning('OpenAI API error: 401 — '.$response->body());
+
+                    continue;
+                }
+
+                if ($response->failed()) {
+                    Log::warning('OpenAI API error: '.$response->status().' — '.$response->body());
+
+                    return 'No se pudo generar la respuesta en este momento. (Error: '.$response->status().')';
+                }
+
+                return $response->json('choices.0.message.content', 'No se pudo generar la respuesta.');
+            } catch (RequestException $e) {
+                Log::error('OpenAI API exception: '.$e->getMessage());
+
+                return 'No se pudo conectar con el servicio de IA en este momento.';
+            }
         }
 
-        return $response->json('choices.0.message.content', 'No se pudo generar la respuesta.');
+        return 'No se pudo generar la respuesta en este momento. (Error: 401)';
     }
 }
