@@ -1,8 +1,9 @@
 # Production Dockerfile for Laravel
 FROM php:8.2-cli-alpine
 
-# Install system dependencies
+# Install bash and system dependencies
 RUN apk add --no-cache \
+    bash \
     libpng-dev \
     libxml2-dev \
     zip \
