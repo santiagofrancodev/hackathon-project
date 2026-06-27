@@ -29,4 +29,4 @@ RUN composer install --no-dev --optimize-autoloader
 RUN chmod -R 775 storage bootstrap/cache
 
 # Start command - port is set at runtime
-CMD ["bash", "start.sh"]
+CMD ["bash", "/var/www/html/start.sh"]
