@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
 
-echo "Caching config..."
-php artisan config:cache
-
 echo "Waiting for database to be ready..."
 for i in {1..30}; do
-    # Check if DB env vars are set (Render provides them when DB is connected)
+    # Try DATABASE_URL first (Render format)
+    if [ -n "$DATABASE_URL" ]; then
+        if php -r "new PDO('$DATABASE_URL');" 2>/dev/null; then
+            echo "Database ready!"
+            break
+        fi
+    fi
+    # Or try individual DB_ vars
     if [ -n "$DB_HOST" ] && [ -n "$DB_DATABASE" ]; then
-        if php -r "new PDO('pgsql:host=' . getenv('DB_HOST') . ';port=' . getenv('DB_PORT') . ';dbname=' . getenv('DB_DATABASE'), getenv('DB_USERNAME'), getenv('DB_PASSWORD'));" 2>/dev/null; then
+        if php -r "new PDO('pgsql:host='.getenv('DB_HOST').';port='.getenv('DB_PORT').';dbname='.getenv('DB_DATABASE'), getenv('DB_USERNAME'), getenv('DB_PASSWORD'));" 2>/dev/null; then
             echo "Database ready!"
             break
         fi
