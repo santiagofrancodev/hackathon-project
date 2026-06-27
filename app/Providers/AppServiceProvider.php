@@ -15,10 +15,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Force HTTPS scheme for asset URLs in production (Railway, Render, etc.)
-        if (config('app.env') === 'production') {
-            URL::forceScheme('https');
-        }
+        // Force HTTPS scheme for all asset and route URLs
+        URL::forceScheme('https');
 
         // Ensure SQLite database file exists (required for Railway/demo deploy)
         if (config('database.default') === 'sqlite' && ! file_exists(database_path('database.sqlite'))) {

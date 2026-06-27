@@ -26,7 +26,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 COPY . .
 
 # Create minimal .env for build (overridden by Railway env vars at runtime)
-RUN php -r 'file_put_contents(".env", "APP_ENV=production\nAPP_KEY=base64:" . base64_encode(random_bytes(32)) . "\nDB_CONNECTION=sqlite\nAPP_DEBUG=false\n");'
+RUN php -r 'file_put_contents(".env", "APP_ENV=production\nAPP_KEY=base64:" . base64_encode(random_bytes(32)) . "\nAPP_URL=https://localhost\nDB_CONNECTION=sqlite\nAPP_DEBUG=false\n");'
 
 # PHP dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction
