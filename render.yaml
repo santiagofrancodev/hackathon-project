@@ -2,25 +2,48 @@ services:
   - type: web
     name: cumplia-web
     runtime: docker
-    buildCommand: docker build -t cumplia .
-    startCommand: bash start.sh
-    envVars:
-      APP_ENV: production
-      APP_DEBUG: false
-      LOG_LEVEL: error
-      DB_CONNECTION: pgsql
     healthCheckPath: /
     autoDeploy: true
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: LOG_LEVEL
+        value: error
+      - key: APP_KEY
+        value: base64:8D/ylE9iSVovvCK03VFXpZjy/dQeDVwA7vSlM5GDiKc=
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: cumplia-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: cumplia-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: cumplia-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: cumplia-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: cumplia-db
+          property: password
+      # Set these manually in Render Dashboard → Environment:
+      # APP_KEY   → run locally: php artisan key:generate --show
+      # OPENAI_API_KEY
+      # GOOGLE_CLIENT_ID
+      # GOOGLE_CLIENT_SECRET
+      # GOOGLE_REDIRECT_URI → https://<tu-dominio>.onrender.com/auth/google/callback
+      # CUMPLIA_DEMO_MODE=true
 
 databases:
   - name: cumplia-db
-    type: postgresql
+    databaseName: cumplia
     plan: free
-
-envVarGroups:
-  - name: cumplia-secrets
-    envVars:
-      APP_KEY: generate
-      GEMINI_API_KEY:
-      GOOGLE_CLIENT_ID:
-      GOOGLE_CLIENT_SECRET:
