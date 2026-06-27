@@ -8,16 +8,9 @@ use Illuminate\Http\Request;
 class TrustProxies extends Middleware
 {
     /**
-     * The headers that should be used to detect proxies.
-     *
-     * @var array<int, string>
-     */
-    protected $headers = Request::HEADER_X_FORWARDED_FOR | Request::HEADER_X_FORWARDED_PROTO | Request::HEADER_X_FORWARDED_HOST | Request::HEADER_X_FORWARDED_PORT | Request::HEADER_X_FORWARDED_PREFIX;
-
-    /**
      * Trust all proxies (Railway, Render, etc.).
      *
-     * @var bool
+     * @var string|array<int, string>|null
      */
     protected $proxies = '*';
 }
