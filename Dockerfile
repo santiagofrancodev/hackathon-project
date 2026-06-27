@@ -14,8 +14,9 @@ RUN apk add --no-cache \
     libjpeg-turbo-dev
 
 # PHP extensions (GD needed for dompdf)
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo mbstring exif pcntl bcmath gd
+RUN apk add --no-cache sqlite-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo pdo_sqlite mbstring exif pcntl bcmath gd
 
 WORKDIR /var/www/html
 

@@ -7,6 +7,12 @@ __DIR__="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Ensure SQLite database exists
 touch "${__DIR__}/database/database.sqlite"
 
+echo "Running migrations..."
+php artisan migrate --force
+
+echo "Seeding demo data..."
+php artisan db:seed --class=DemoSeeder --force
+
 echo "Caching config..."
 php artisan config:cache
 
