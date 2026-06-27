@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Assessment extends Model
 {
@@ -15,6 +16,15 @@ class Assessment extends Model
         'score',
         'ai_summary',
     ];
+
+    protected $casts = [
+        'status' => 'string',
+    ];
+
+    public function isValidStatus(string $status): bool
+    {
+        return in_array($status, ['in_progress', 'completed']);
+    }
 
     public function company(): BelongsTo
     {
@@ -34,5 +44,10 @@ class Assessment extends Model
     public function recommendations(): HasMany
     {
         return $this->hasMany(Recommendation::class);
+    }
+
+    public function auditorRequest(): HasOne
+    {
+        return $this->hasOne(AuditorRequest::class);
     }
 }

@@ -17,6 +17,11 @@ class Company extends Model
         'plan',
     ];
 
+    protected $casts = [
+        'size' => 'string',
+        'plan' => 'string',
+    ];
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

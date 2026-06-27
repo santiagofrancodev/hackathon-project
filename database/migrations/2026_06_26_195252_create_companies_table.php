@@ -14,7 +14,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('nit')->unique();
             $table->string('sector')->nullable();
-            $table->enum('size', ['small', 'medium', 'large'])->nullable();
+            $table->string('size')->nullable();
             $table->timestamps();
         });
     }

@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: cumplia-web
+    runtime: docker
+    buildCommand: docker build -t cumplia .
+    startCommand: bash start.sh
+    envVars:
+      APP_ENV: production
+      APP_DEBUG: false
+      LOG_LEVEL: error
+      DB_CONNECTION: pgsql
+    healthCheckPath: /
+    autoDeploy: true
+
+databases:
+  - name: cumplia-db
+    type: postgresql
+    plan: free
+
+envVarGroups:
+  - name: cumplia-secrets
+    envVars:
+      APP_KEY: generate
+      GEMINI_API_KEY:
+      GOOGLE_CLIENT_ID:
+      GOOGLE_CLIENT_SECRET:

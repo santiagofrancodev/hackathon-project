@@ -83,4 +83,14 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsToMany(Company::class, 'auditor_company')
             ->withTimestamps();
     }
+
+    public function auditorRequests(): HasMany
+    {
+        return $this->hasMany(AuditorRequest::class, 'requester_id');
+    }
+
+    public function assignedRequests(): HasMany
+    {
+        return $this->hasMany(AuditorRequest::class, 'assigned_auditor_id');
+    }
 }

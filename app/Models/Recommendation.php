@@ -15,6 +15,11 @@ class Recommendation extends Model
         'origin',
     ];
 
+    protected $casts = [
+        'priority' => 'string',
+        'origin' => 'string',
+    ];
+
     public function assessment(): BelongsTo
     {
         return $this->belongsTo(Assessment::class);

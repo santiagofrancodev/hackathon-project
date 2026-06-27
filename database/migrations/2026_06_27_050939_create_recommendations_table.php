@@ -13,8 +13,8 @@ return new class extends Migration
             $table->foreignId('assessment_id')->constrained()->cascadeOnDelete();
             $table->foreignId('question_id')->nullable()->constrained()->nullOnDelete();
             $table->text('text');
-            $table->enum('priority', ['high', 'medium', 'low'])->default('medium');
-            $table->enum('origin', ['rule', 'ai'])->default('rule');
+            $table->string('priority')->default('medium');
+            $table->string('origin')->default('rule');
             $table->timestamps();
         });
     }
