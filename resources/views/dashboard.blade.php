@@ -77,11 +77,11 @@
                         <div class="space-y-3">
                             <a href="{{ route('diagnostic.index') }}" class="block p-3 bg-primary/5 rounded-lg hover:bg-primary/10 transition border border-primary/10">
                                 <p class="text-sm font-medium text-primary">Nuevo autodiagnóstico</p>
-                                <p class="text-xs text-primary/70">Evaluá el cumplimiento de tu empresa con la Ley 1581</p>
+                                <p class="text-xs text-primary/70">Evalúa el cumplimiento de tu empresa con la Ley 1581</p>
                             </a>
                             <a href="{{ route('company.create') }}" class="block p-3 bg-high-bg rounded-lg hover:bg-high-text/10 transition border border-high-text/10">
                                 <p class="text-sm font-medium text-high-text">Registrar empresa</p>
-                                <p class="text-xs text-high-text/70">Agregá una nueva empresa para evaluar</p>
+                                <p class="text-xs text-high-text/70">Agrega una nueva empresa para evaluar</p>
                             </a>
                         </div>
                     </div>

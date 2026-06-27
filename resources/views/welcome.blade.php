@@ -6,6 +6,9 @@
     <meta name="description" content="CumplIA — Autodiagnóstico de cumplimiento de la Ley 1581 de Protección de Datos para PYMEs colombianas.">
 
     <title>CumplIA — Autodiagnóstico Ley 1581</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('img/cumplia-icon.svg') }}">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,14 +21,11 @@
 <body class="font-sans antialiased bg-bg-page text-body-text">
     <div class="min-h-screen flex flex-col">
         {{-- NAV --}}
-        <nav class="bg-sidebar-dark text-white">
+<nav class="bg-sidebar-dark text-white">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between h-16">
                     <div class="flex items-center gap-2">
-                        <svg class="w-8 h-8 text-brand-emerald" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                        </svg>
-                        <span class="text-xl font-bold tracking-tight">Cumpl<span class="text-high-text">IA</span></span>
+                        <x-application-logo class="h-8 w-auto" />
                     </div>
                     <div class="flex items-center gap-4">
                         @if (Route::has('login'))
@@ -60,15 +60,15 @@
                         en minutos
                     </h1>
                     <p class="text-lg sm:text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-                        CumplIA es la herramienta gratuita de autodiagnóstico que ayuda a tu PYME 
-                        a evaluar su cumplimiento de la <strong>Ley 1581 de 2012</strong> con la ayuda de 
-                        inteligencia artificial — sin necesitar un abogado de planta.
+CumplIA es la herramienta gratuita de autodiagnóstico que ayuda a su PYME 
+                         a evaluar su cumplimiento de la <strong>Ley 1581 de 2012</strong> con la ayuda de 
+                         inteligencia artificial — sin necesitar un abogado de planta.
                     </p>
                     <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
                         <a href="{{ route('register') }}" 
                            class="px-8 py-4 bg-sidebar-dark text-white text-lg font-semibold rounded-xl hover:bg-sidebar-dark/90 transition shadow-lg hover:shadow-xl flex items-center gap-2">
                             Comenzar autodiagnóstico
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
                         </a>
                         <a href="#features" class="px-8 py-4 border-2 border-border-light text-muted-text text-lg font-semibold rounded-xl hover:border-gray-300 transition">
                             Conocer más
@@ -94,22 +94,22 @@
                     {{-- Feature 1 --}}
                     <div class="bg-bg-page rounded-2xl p-8 hover:shadow-lg transition border border-border-light">
                         <div class="w-14 h-14 bg-high-bg rounded-xl flex items-center justify-center mb-6">
-                            <svg class="w-7 h-7 text-high-text" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                            <svg class="w-7 h-7 text-high-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="m9 14 2 2 4-4"/>
                             </svg>
                         </div>
                         <h3 class="text-xl font-bold text-sidebar-dark mb-3">Diagnóstico Inteligente</h3>
                         <p class="text-muted-text leading-relaxed">
                             11 preguntas estructuradas en 3 bloques clave: política de datos, privacidad desde el diseño 
-                            y gobernanza. Respondé en menos de 10 minutos y obtené tu nivel de cumplimiento.
+                            y gobernanza. Responde en menos de 10 minutos y obtén tu nivel de cumplimiento.
                         </p>
                     </div>
 
                     {{-- Feature 2 --}}
                     <div class="bg-bg-page rounded-2xl p-8 hover:shadow-lg transition border border-border-light">
                         <div class="w-14 h-14 bg-high-bg rounded-xl flex items-center justify-center mb-6">
-                            <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                            <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                             </svg>
                         </div>
                         <h3 class="text-xl font-bold text-sidebar-dark mb-3">Cumplimiento Ley 1581</h3>
@@ -122,8 +122,8 @@
                     {{-- Feature 3 --}}
                     <div class="bg-bg-page rounded-2xl p-8 hover:shadow-lg transition border border-border-light">
                         <div class="w-14 h-14 bg-medium-bg rounded-xl flex items-center justify-center mb-6">
-                            <svg class="w-7 h-7 text-medium-text" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            <svg class="w-7 h-7 text-medium-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
                             </svg>
                         </div>
                         <h3 class="text-xl font-bold text-sidebar-dark mb-3">Recomendaciones con IA</h3>
@@ -147,18 +147,18 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
                     <div class="text-center">
                         <div class="w-16 h-16 bg-sidebar-dark text-white rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl font-bold">1</div>
-                        <h3 class="text-lg font-bold text-sidebar-dark mb-2">Registrate</h3>
-                        <p class="text-muted-text">Creá tu cuenta y registrá los datos de tu empresa en menos de 2 minutos.</p>
+                        <h3 class="text-lg font-bold text-sidebar-dark mb-2">Regístrate</h3>
+                        <p class="text-muted-text">Crea tu cuenta y registra los datos de tu empresa en menos de 2 minutos.</p>
                     </div>
                     <div class="text-center">
                         <div class="w-16 h-16 bg-sidebar-dark text-white rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl font-bold">2</div>
-                        <h3 class="text-lg font-bold text-sidebar-dark mb-2">Respondé</h3>
-                        <p class="text-muted-text">Completá el cuestionario de 11 preguntas sobre tus prácticas de protección de datos.</p>
+                        <h3 class="text-lg font-bold text-sidebar-dark mb-2">Responde</h3>
+                        <p class="text-muted-text">Completa el cuestionario de 11 preguntas sobre tus prácticas de protección de datos.</p>
                     </div>
                     <div class="text-center">
                         <div class="w-16 h-16 bg-sidebar-dark text-white rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl font-bold">3</div>
-                        <h3 class="text-lg font-bold text-sidebar-dark mb-2">Actuá</h3>
-                        <p class="text-muted-text">Recibí tu resultado, identificá brechas y seguí el plan de acción recomendado.</p>
+                        <h3 class="text-lg font-bold text-sidebar-dark mb-2">Actúa</h3>
+                        <p class="text-muted-text">Recibe tu resultado, identifica brechas y sigue el plan de acción recomendado.</p>
                     </div>
                 </div>
             </div>
@@ -172,12 +172,12 @@
                 </h2>
                 <p class="text-lg text-white/70 mb-8">
                     La Superintendencia de Industria y Comercio sanciona el incumplimiento. 
-                    Enterate hoy mismo sin costo y sin compromiso.
+                    Entérate hoy mismo sin costo y sin compromiso.
                 </p>
                 <a href="{{ route('register') }}" 
                    class="inline-flex items-center px-8 py-4 bg-primary text-white text-lg font-semibold rounded-xl hover:bg-primary-hover transition shadow-lg">
                     Iniciar autodiagnóstico gratis
-                    <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                    <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
                 </a>
             </div>
         </section>
@@ -187,10 +187,7 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div class="flex items-center gap-2">
-                        <svg class="w-6 h-6 text-high-text" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                        </svg>
-                        <span class="text-white font-semibold">Cumpl<span class="text-high-text">IA</span></span>
+                        <x-application-logo class="h-8 w-auto" />
                     </div>
                     <p class="text-white/50 text-sm">
                         Autodiagnóstico de cumplimiento — Ley 1581 de 2012

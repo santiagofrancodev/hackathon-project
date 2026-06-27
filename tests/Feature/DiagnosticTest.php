@@ -3,10 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\Assessment;
-use App\Models\Category;
-use App\Models\User;
 use App\Models\Company;
 use App\Models\Question;
+use App\Models\User;
+use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -17,9 +17,9 @@ class DiagnosticTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Seed questions
-        $this->seed(\Database\Seeders\DatabaseSeeder::class);
+        $this->seed(DatabaseSeeder::class);
     }
 
     public function test_assessment_completes_with_partial_answers(): void
@@ -45,7 +45,7 @@ class DiagnosticTest extends TestCase
             ->take(3)
             ->get();
 
-        $answers = $answerableQuestions->map(fn($q) => [
+        $answers = $answerableQuestions->map(fn ($q) => [
             'question_id' => $q->id,
             'answer' => true,
         ])->toArray();
@@ -55,7 +55,7 @@ class DiagnosticTest extends TestCase
             ->assertRedirect(route('diagnostic.results', $assessment));
 
         $assessment->refresh();
-        
+
         $this->assertEquals('completed', $assessment->status);
         $this->assertNotNull($assessment->score);
         $this->assertGreaterThanOrEqual(0, $assessment->score);
@@ -84,7 +84,7 @@ class DiagnosticTest extends TestCase
             ->where('weight', '>', 0)
             ->get();
 
-        $answers = $questions->map(fn($q) => [
+        $answers = $questions->map(fn ($q) => [
             'question_id' => $q->id,
             'answer' => true,
         ])->toArray();
@@ -93,7 +93,7 @@ class DiagnosticTest extends TestCase
             ->post(route('diagnostic.submit', $assessment), ['answers' => $answers]);
 
         $assessment->refresh();
-        
+
         // All correct answers should give 100%
         $this->assertEquals(100, $assessment->score);
     }

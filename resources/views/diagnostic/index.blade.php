@@ -16,8 +16,8 @@
             @if($companies->isEmpty())
                 <div class="bg-card-bg overflow-hidden shadow-sm border border-border-light sm:rounded-lg">
                     <div class="p-6 text-center">
-                        <svg class="mx-auto h-16 w-16 text-muted-text" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        <svg class="mx-auto h-16 w-16 text-muted-text" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
                         </svg>
                         <h3 class="mt-4 text-lg font-medium text-body-text">No hay empresas registradas</h3>
                         <p class="mt-2 text-sm text-muted-text">Registre su empresa primero para comenzar el autodiagnóstico.</p>

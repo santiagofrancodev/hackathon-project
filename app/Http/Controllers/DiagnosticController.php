@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Assessment;
 use App\Models\Category;
 use App\Models\Company;
+use App\Models\Question;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -44,7 +45,7 @@ class DiagnosticController extends Controller
         $this->authorizeAccess($assessment);
 
         $assessment->load('answers');
-        
+
         $categories = Category::with(['questions' => function ($query) {
             $query->orderBy('sort_order');
         }])->orderBy('sort_order')->get();
@@ -66,18 +67,18 @@ class DiagnosticController extends Controller
         ]);
 
         $submittedAnswers = $validated['answers'] ?? [];
-        
+
         // Get all answerable questions (non-complementary, weight > 0)
-        $answerableQuestions = \App\Models\Question::where('is_complementary', false)
+        $answerableQuestions = Question::where('is_complementary', false)
             ->where('weight', '>', 0)
             ->pluck('id')
             ->toArray();
-        
+
         $submittedQuestionIds = array_column($submittedAnswers, 'question_id');
-        
+
         // Add missing questions as "No" answers
         foreach ($answerableQuestions as $questionId) {
-            if (!in_array($questionId, $submittedQuestionIds)) {
+            if (! in_array($questionId, $submittedQuestionIds)) {
                 $submittedAnswers[] = [
                     'question_id' => $questionId,
                     'answer' => false,
@@ -116,7 +117,7 @@ class DiagnosticController extends Controller
         $this->authorizeAccess($assessment);
 
         $assessment->load('answers.question');
-        
+
         $categories = Category::with(['questions' => function ($query) {
             $query->orderBy('sort_order');
         }])->orderBy('sort_order')->get();

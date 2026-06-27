@@ -38,7 +38,7 @@
                             <label for="size" class="block text-sm font-medium text-body-text">Tamaño de la empresa</label>
                             <select name="size" id="size"
                                     class="mt-1 block w-full rounded-md border-border-light shadow-sm focus:border-primary focus:ring-primary">
-                                <option value="">Seleccioná un tamaño...</option>
+                                <option value="">Selecciona un tamaño...</option>
                                 <option value="small" {{ old('size') == 'small' ? 'selected' : '' }}>Pequeña</option>
                                 <option value="medium" {{ old('size') == 'medium' ? 'selected' : '' }}>Mediana</option>
                                 <option value="large" {{ old('size') == 'large' ? 'selected' : '' }}>Grande</option>
