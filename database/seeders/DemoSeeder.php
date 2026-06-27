@@ -15,6 +15,10 @@ class DemoSeeder extends Seeder
 {
     public function run(): void
     {
+        if (User::where('email', 'admin@checkdata.ai')->exists()) {
+            return;
+        }
+
         // ===== USERS =====
         $admin = User::create([
             'name' => 'Admin CheckData',

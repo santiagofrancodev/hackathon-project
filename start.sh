@@ -11,7 +11,7 @@ echo "Running migrations..."
 php artisan migrate --force
 
 echo "Seeding demo data..."
-php artisan db:seed --class=DemoSeeder --force
+php artisan db:seed --force
 
 echo "Caching config..."
 php artisan config:cache

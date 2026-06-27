@@ -10,6 +10,10 @@ class DiagnosticSeeder extends Seeder
 {
     public function run(): void
     {
+        if (Category::exists()) {
+            return;
+        }
+
         // Bloque 1: Política de datos personales (Máximo 40%)
         $cat1 = Category::create([
             'name' => 'Política de datos personales',
