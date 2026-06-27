@@ -14,8 +14,7 @@
             @endif
 
             <!-- Score Gauge -->
-            <div class="bg-card-bg overflow-hidden shadow-sm border border-border-light sm:rounded-lg mb-6"
-                 x-data="{ aiLoading: false, aiText: '', aiOpen: false }">
+            <div class="bg-card-bg overflow-hidden shadow-sm border border-border-light sm:rounded-lg mb-6">
                 <div class="p-6 text-center">
                     <h3 class="text-lg font-semibold text-body-text mb-2">Nivel de Cumplimiento</h3>
                     <p class="text-sm text-muted-text mb-4">Empresa: <strong>{{ $assessment->company->name }}</strong></p>
@@ -23,10 +22,10 @@
                     <div class="relative inline-flex items-center justify-center">
                         <svg class="w-48 h-48 transform -rotate-90" viewBox="0 0 120 120">
                             <circle cx="60" cy="60" r="54" fill="none" stroke="#e5e7eb" stroke-width="8"/>
-                            <circle cx="60" cy="60" r="54" fill="none" 
-                                stroke="{{ $assessment->score >= 70 ? '#22c55e' : ($assessment->score >= 40 ? '#eab308' : '#ef4444') }}" 
-                                stroke-width="8" 
-                                stroke-dasharray="339.292" 
+                            <circle cx="60" cy="60" r="54" fill="none"
+                                stroke="{{ $assessment->score >= 70 ? '#22c55e' : ($assessment->score >= 40 ? '#eab308' : '#ef4444') }}"
+                                stroke-width="8"
+                                stroke-dasharray="339.292"
                                 stroke-dashoffset="{{ 339.292 - (339.292 * $assessment->score / 100) }}"
                                 stroke-linecap="round"
                                 class="transition-all duration-1000"/>
@@ -48,66 +47,86 @@
                             </p>
                         </div>
                     </div>
-
-                    {{-- AI Summary (inline, persists) --}}
-                    @if($assessment->ai_summary)
-                        <div class="mt-6 pt-4 border-t border-border-light text-left">
-                            <div class="flex items-center gap-2 mb-3">
-                                <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                                    <x-icon name="bolt" class="w-4 h-4 text-primary" />
-                                </div>
-                                <h4 class="text-sm font-bold text-body-text">Análisis IA</h4>
-                            </div>
-                            <div class="text-sm text-muted-text leading-relaxed space-y-2">
-                                @foreach(explode("\n\n", $assessment->ai_summary) as $paragraph)
-                                    <p>{{ $paragraph }}</p>
-                                @endforeach
-                            </div>
-                        </div>
-                    @else
-                        {{-- Fallback: on-demand IA interpretation --}}
-                        <div class="mt-6 pt-4 border-t border-border-light"
-                             x-data="{ aiLoading: false, aiText: '', aiOpen: false }">
-                            <button type="button"
-                                    @@click="aiLoading = true; aiOpen = true; fetch('{{ route('ia.interpretar') }}', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }, body: JSON.stringify({ assessment_id: {{ $assessment->id }} }) }).then(r => r.json()).then(d => { aiText = d.interpretacion; aiLoading = false; })"
-                                    class="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary text-sm font-medium rounded-lg hover:bg-primary/20 transition">
-                                <x-icon name="bolt" class="w-4 h-4" />
-                                Interpretar resultados con IA
-                            </button>
-                            <div x-show="aiOpen" class="fixed inset-0 z-50 flex items-center justify-center" style="display: none;" x-cloak>
-                                <div x-show="aiOpen" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="fixed inset-0 bg-black/50 backdrop-blur-sm" @@click="aiOpen = false"></div>
-                                <div x-show="aiOpen" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95 translate-y-4" x-transition:enter-end="opacity-100 scale-100 translate-y-0" class="relative z-10 bg-card-bg border border-border-light rounded-2xl shadow-2xl p-6 max-w-lg w-full mx-4">
-                                    <div class="flex items-center gap-3 mb-4">
-                                        <div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
-                                            <x-icon name="bolt" class="w-5 h-5 text-primary" />
-                                        </div>
-                                        <div>
-                                            <h3 class="text-lg font-bold text-body-text">Interpretación con IA</h3>
-                                            <p class="text-xs text-muted-text">Análisis del resultado</p>
-                                        </div>
-                                    </div>
-                                    <div class="min-h-[60px]">
-                                        <template x-if="aiLoading">
-                                            <div class="flex items-center justify-center py-6">
-                                                <svg class="animate-spin h-6 w-6 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                </svg>
-                                            </div>
-                                        </template>
-                                        <template x-if="!aiLoading && aiText">
-                                            <p class="text-sm text-body-text leading-relaxed" x-text="aiText"></p>
-                                        </template>
-                                    </div>
-                                    <div class="mt-6 flex justify-end">
-                                        <button type="button" @@click="aiOpen = false" class="px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-hover transition">Cerrar</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @endif
                 </div>
             </div>
+
+            {{-- AI Executive Report --}}
+            @if($assessment->company->isPro())
+                <div class="bg-card-bg overflow-hidden shadow-sm border border-border-light sm:rounded-lg mb-6"
+                     x-data="{
+                         loading: false,
+                         summary: {{ $assessment->ai_summary ? json_encode($assessment->ai_summary) : 'null' }},
+                         generate() {
+                             this.loading = true;
+                             fetch('{{ route('ia.informe') }}', {
+                                 method: 'POST',
+                                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                                 body: JSON.stringify({ assessment_id: {{ $assessment->id }} })
+                             })
+                             .then(r => r.json())
+                             .then(d => { this.summary = d.summary; this.loading = false; })
+                             .catch(() => { this.loading = false; });
+                         }
+                     }">
+                    <div class="p-6">
+                        <div class="flex items-center gap-3 mb-5">
+                            <div class="w-9 h-9 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
+                                <x-icon name="bolt" class="w-4 h-4 text-primary" />
+                            </div>
+                            <div>
+                                <h3 class="text-base font-semibold text-body-text">Informe Ejecutivo con IA</h3>
+                                <p class="text-xs text-muted-text">Análisis experto basado en Ley 1581 de Colombia</p>
+                            </div>
+                            <span class="ml-auto shrink-0 inline-flex items-center px-2 py-0.5 text-xs font-semibold bg-primary/10 text-primary rounded-full">Pro</span>
+                        </div>
+
+                        {{-- Report loaded --}}
+                        <template x-if="summary && !loading">
+                            <div class="text-sm text-body-text leading-relaxed" x-html="
+                                summary
+                                    .replace(/=== (.+?) ===/g, '<h4 class=\'text-xs font-semibold uppercase tracking-widest text-primary mt-5 mb-2 first:mt-0\'>$1</h4>')
+                                    .replace(/\n/g, '<br>')
+                            "></div>
+                        </template>
+
+                        {{-- Loading --}}
+                        <template x-if="loading">
+                            <div class="flex items-center gap-3 py-8 text-muted-text text-sm">
+                                <svg class="animate-spin h-5 w-5 text-primary shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Generando informe ejecutivo con IA experta en Ley 1581...
+                            </div>
+                        </template>
+
+                        {{-- Not yet generated --}}
+                        <template x-if="!summary && !loading">
+                            <div class="text-center py-6">
+                                <p class="text-sm text-muted-text mb-4">Analiza tus resultados con un consultor IA experto en Ley 1581. Recibirás diagnóstico, riesgos legales concretos y una hoja de ruta 30/60/90 días.</p>
+                                <button type="button" @@click="generate()"
+                                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-hover transition">
+                                    <x-icon name="bolt" class="w-4 h-4" />
+                                    Generar informe ejecutivo
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            @else
+                <div class="bg-card-bg overflow-hidden shadow-sm border border-border-light sm:rounded-lg mb-6">
+                    <div class="p-5 flex items-center gap-4">
+                        <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
+                            <x-icon name="bolt" class="w-5 h-5 text-primary" />
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-semibold text-body-text">Informe Ejecutivo con IA</p>
+                            <p class="text-xs text-muted-text mt-0.5">Diagnóstico experto, riesgos legales ante la SIC y hoja de ruta personalizada. Disponible en plan Pro.</p>
+                        </div>
+                        <span class="shrink-0 px-3 py-1.5 text-xs font-semibold bg-primary/10 text-primary rounded-lg">Pro</span>
+                    </div>
+                </div>
+            @endif
 
             <!-- Category Breakdown -->
             <div class="bg-card-bg overflow-hidden shadow-sm border border-border-light sm:rounded-lg mb-6">

@@ -219,26 +219,82 @@ class DiagnosticController extends Controller
 
     private function generateAiSummary(Assessment $assessment): void
     {
-        $assessment->load('company', 'recommendations');
+        $assessment->load([
+            'company',
+            'recommendations',
+            'answers' => fn ($q) => $q->with('question'),
+        ]);
 
         // Free plan users don't get AI summary
         if ($assessment->company->isFree()) {
             return;
         }
 
-        $brechas = $assessment->recommendations
-            ->where('origin', 'rule')
-            ->pluck('text')
-            ->implode('; ');
+        $company = $assessment->company;
+        $tamano = ['small' => 'Pequeña', 'medium' => 'Mediana', 'large' => 'Grande'][$company->size] ?? 'No especificado';
+        $sector = $company->sector ?? 'No especificado';
+
+        // Build per-block breakdown
+        $categories = Category::with(['questions' => fn ($q) => $q->orderBy('sort_order')])
+            ->orderBy('sort_order')
+            ->get();
+
+        $answersByQuestion = $assessment->answers->keyBy('question_id');
+        $bloques = '';
+        foreach ($categories as $cat) {
+            $earned = 0;
+            $total = 0;
+            foreach ($cat->questions as $q) {
+                if ($q->is_complementary || $q->weight === 0) {
+                    continue;
+                }
+                $total += $q->weight;
+                $ans = $answersByQuestion->get($q->id);
+                if ($ans && $ans->answer) {
+                    $earned += $q->weight;
+                }
+            }
+            $pct = $total > 0 ? round(($earned / $total) * $cat->max_percentage) : 0;
+            $bloques .= "- {$cat->name}: {$pct}% / {$cat->max_percentage}%\n";
+        }
+
+        // Build detailed gaps with question text
+        $gapsDetallados = '';
+        foreach ($assessment->answers as $answer) {
+            if ($answer->answer || ! $answer->question) {
+                continue;
+            }
+            $q = $answer->question;
+            if ($q->is_complementary || $q->weight === 0) {
+                continue;
+            }
+            $gapsDetallados .= "- [{$q->weight}%] {$q->question_text}\n";
+        }
+
+        // Build recommendations by priority
+        $recomendaciones = '';
+        foreach (['high' => 'ALTA', 'medium' => 'MEDIA', 'low' => 'BAJA'] as $pri => $label) {
+            $items = $assessment->recommendations->where('priority', $pri);
+            if ($items->isEmpty()) {
+                continue;
+            }
+            $recomendaciones .= "=== {$label} ===\n";
+            foreach ($items as $rec) {
+                $origen = $rec->origin === 'ai' ? 'IA' : 'Regla';
+                $recomendaciones .= "- [{$origen}] {$rec->text}\n";
+            }
+        }
 
         $ai = app(AIService::class);
-        $sector = $assessment->company->sector ?? 'No especificado';
 
         $summary = $ai->generarInformeEjecutivo(
-            $assessment->company->name,
+            $company->name,
             $sector,
+            $tamano,
             (int) $assessment->score,
-            $brechas
+            $bloques,
+            $gapsDetallados,
+            $recomendaciones,
         );
 
         $assessment->update(['ai_summary' => $summary]);

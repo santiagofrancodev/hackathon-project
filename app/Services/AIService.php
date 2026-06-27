@@ -36,30 +36,66 @@ class AIService
 
     public function interpretarResultado(int $score, string $empresa): string
     {
-        $prompt = "Eres un experto en Ley 1581. La empresa '{$empresa}' obtuvo {$score}% 
-        de cumplimiento en su autodiagnóstico de protección de datos. 
-        Interpreta este resultado en 2-3 oraciones: qué significa, cuáles son los riesgos principales 
+        $prompt = "Eres un experto en Ley 1581. La empresa '{$empresa}' obtuvo {$score}%
+        de cumplimiento en su autodiagnóstico de protección de datos.
+        Interpreta este resultado en 2-3 oraciones: qué significa, cuáles son los riesgos principales
         y un mensaje motivador para mejorar.";
 
         return $this->call($prompt);
     }
 
-    public function generarInformeEjecutivo(string $empresa, string $sector, int $score, string $brechas): string
-    {
-        $prompt = "Eres consultor experto en Ley 1581 de Colombia. 
-        La empresa '{$empresa}' (sector: {$sector}) 
-        obtuvo {$score}% de cumplimiento. 
-        Brechas principales: {$brechas}.
-        Genera un informe ejecutivo en 4 párrafos:
-        1. Diagnóstico general del nivel de cumplimiento
-        2. Principales riesgos legales identificados
-        3. Prioridades de acción inmediata
-        4. Perspectiva de mejora y próximos pasos";
+    public function generarInformeEjecutivo(
+        string $empresa,
+        string $sector,
+        string $tamano,
+        int $score,
+        string $bloques,
+        string $gapsDetallados,
+        string $recomendaciones,
+    ): string {
+        $nivel = $score >= 80 ? 'ALTO' : ($score >= 60 ? 'MODERADO' : ($score >= 40 ? 'BAJO' : 'CRÍTICO'));
 
-        return $this->call($prompt);
+        $prompt = <<<PROMPT
+Eres un consultor senior experto en la Ley 1581 de 2012 de Colombia. Redacta un INFORME EJECUTIVO DE DIAGNÓSTICO completo y profesional en español neutro.
+
+## DATOS DE LA EMPRESA
+- Nombre: {$empresa}
+- Sector: {$sector}
+- Tamaño: {$tamano}
+
+## RESULTADO GLOBAL
+- Puntaje total: {$score}% — Nivel {$nivel}
+
+## DESGLOSE POR BLOQUE
+{$bloques}
+
+## BRECHAS IDENTIFICADAS (areas de mejora)
+{$gapsDetallados}
+
+## RECOMENDACIONES POR PRIORIDAD
+{$recomendaciones}
+
+---
+
+Genera un INFORME EJECUTIVO estructurado EXACTAMENTE con estas secciones (usa los titulos textuales sin numeracion):
+
+=== DIAGNÓSTICO GENERAL ===
+Analiza el puntaje total ({$score}%) en el contexto del sector {$sector}. Explica que significa este nivel de cumplimiento para una empresa de este tamaño y rubro. Menciona los bloques mejor y peor evaluados.
+
+=== RIESGOS LEGALES IDENTIFICADOS ===
+Lista y explica los principales riesgos legales y sanciones economicas potenciales segun la Ley 1581 (multas SIC hasta 2.000 SMMLV). Relaciona cada riesgo con las brechas especificas encontradas.
+
+=== PRIORIDADES DE ACCIÓN ===
+Ordena las acciones recomendadas por criticidad (ALTA/MEDIA/BAJA). Para cada prioridad, incluye: el area problematica, la accion concreta y el impacto esperado.
+
+=== PRÓXIMOS PASOS ===
+Hoja de ruta recomendada: acciones a 30, 60 y 90 dias. Un mensaje final motivador sobre la importancia de la proteccion de datos.
+PROMPT;
+
+        return $this->call($prompt, 1200);
     }
 
-    private function call(string $prompt): string
+    private function call(string $prompt, int $maxTokens = 300): string
     {
         if (empty($this->apiKey)) {
             return 'Configure la clave de API en el archivo .env para usar esta función.';
@@ -71,10 +107,10 @@ class AIService
         ])->timeout(30)->post('https://api.openai.com/v1/chat/completions', [
             'model' => $this->model,
             'messages' => [
-                ['role' => 'system', 'content' => 'Eres un asistente experto en la Ley 1581 de Colombia. Respondé siempre en español neutro, claro y conciso.'],
+                ['role' => 'system', 'content' => 'Eres un asistente experto en la Ley 1581 de Colombia. Responde siempre en español neutro, claro y conciso.'],
                 ['role' => 'user', 'content' => $prompt],
             ],
-            'max_tokens' => 300,
+            'max_tokens' => $maxTokens,
             'temperature' => 0.7,
         ]);
 

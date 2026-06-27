@@ -38,7 +38,7 @@ Route::middleware('auth')->group(function () {
 // IA endpoints
 Route::middleware('auth')->group(function () {
     Route::post('/ia/explicar-pregunta', [IAController::class, 'explicarPregunta'])->name('ia.explicar');
-    Route::post('/ia/interpretar-resultado', [IAController::class, 'interpretarResultado'])->name('ia.interpretar');
+    Route::post('/ia/generar-informe', [IAController::class, 'generarInforme'])->name('ia.informe');
 });
 
 // Socialite (Google OAuth)
