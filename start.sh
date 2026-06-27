@@ -5,7 +5,10 @@ echo "Caching config..."
 php artisan config:cache
 
 echo "Running migrations..."
-php artisan migrate --force
+until php artisan migrate --force; do
+    echo "Migration failed, retrying in 2s..."
+    sleep 2
+done
 
 echo "Seeding diagnostic questions..."
 php artisan db:seed --class=DiagnosticSeeder --force

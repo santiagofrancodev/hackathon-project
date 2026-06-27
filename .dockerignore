@@ -1,0 +1,10 @@
+.git
+node_modules
+vendor
+storage/*.log
+bootstrap/cache/*.cache
+*.md
+.env
+.phpunit.result.cache
+.php-cs-fixer.cache
+composer.lock
