@@ -14,7 +14,8 @@
                         <p class="text-sm text-muted-text">Responda cada pregunta según corresponda. Las preguntas complementarias no afectan el puntaje.</p>
                     </div>
 
-                    <form action="{{ route('diagnostic.submit', $assessment) }}" method="POST" id="diagnosticForm">
+                    <form action="{{ route('diagnostic.submit', $assessment) }}" method="POST" id="diagnosticForm"
+                          x-data="{ aiQuestionId: null, aiLoading: false, aiText: '', aiOpen: false }">
                         @csrf
 
                         @foreach($categories as $category)
@@ -51,12 +52,20 @@
                                                 <div class="border rounded-lg p-4 border-border-light bg-card-bg">
                                                     <div class="flex items-start gap-3">
                                                         <div class="flex-1">
-                                                            <p class="text-sm font-medium text-body-text">
-                                                                {{ $question->question_text }}
-                                                                @if($question->weight > 0)
-                                                                    <span class="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">{{ $question->weight }}%</span>
-                                                                @endif
-                                                            </p>
+                                                            <div class="flex items-start gap-2">
+                                                                <p class="text-sm font-medium text-body-text">
+                                                                    {{ $question->question_text }}
+                                                                </p>
+                                                                <button type="button"
+                                                                        @@click="aiQuestionId = {{ $question->id }}; aiLoading = true; aiOpen = true; fetch('{{ route('ia.explicar') }}', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }, body: JSON.stringify({ question_id: {{ $question->id }} }) }).then(r => r.json()).then(d => { aiText = d.explicacion; aiLoading = false; })"
+                                                                        class="shrink-0 w-5 h-5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition flex items-center justify-center"
+                                                                        title="Explicar con IA">
+                                                                    <span class="text-xs font-bold leading-none">?</span>
+                                                                </button>
+                                                            </div>
+                                                            @if($question->weight > 0)
+                                                                <span class="mt-1 inline-block text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">{{ $question->weight }}%</span>
+                                                            @endif
                                                             @if($question->help_text)
                                                                 <p class="mt-1 text-xs text-muted-text">{{ $question->help_text }}</p>
                                                             @endif
@@ -92,20 +101,28 @@
                                                          x-transition:enter-end="opacity-100 transform translate-y-0"
                                                          class="ml-6 mt-2 border border-dashed border-border-light rounded-lg p-4 {{ $child->is_complementary ? 'bg-bg-page' : 'bg-card-bg' }}">
                                                         <div class="flex items-start gap-3">
-                                                            <div class="flex-1">
-                                                                <p class="text-sm font-medium text-body-text">
-                                                                    {{ $child->question_text }}
-                                                                    @if($child->is_complementary)
-                                                                        <span class="ml-2 text-xs bg-medium-bg text-medium-text px-2 py-0.5 rounded">Complementaria</span>
-                                                                    @endif
-                                                                    @if($child->weight > 0)
-                                                                        <span class="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">{{ $child->weight }}%</span>
-                                                                    @endif
-                                                                </p>
-                                                                @if($child->help_text)
-                                                                    <p class="mt-1 text-xs text-muted-text">{{ $child->help_text }}</p>
-                                                                @endif
-                                                            </div>
+                                            <div class="flex-1">
+                                                        <div class="flex items-start gap-2">
+                                                            <p class="text-sm font-medium text-body-text">
+                                                                {{ $child->question_text }}
+                                                            </p>
+                                                            <button type="button"
+                                                                    @@click="aiQuestionId = {{ $child->id }}; aiLoading = true; aiOpen = true; fetch('{{ route('ia.explicar') }}', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }, body: JSON.stringify({ question_id: {{ $child->id }} }) }).then(r => r.json()).then(d => { aiText = d.explicacion; aiLoading = false; })"
+                                                                    class="shrink-0 w-5 h-5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition flex items-center justify-center"
+                                                                    title="Explicar con IA">
+                                                                <span class="text-xs font-bold leading-none">?</span>
+                                                            </button>
+                                                        </div>
+                                                        @if($child->is_complementary)
+                                                            <span class="mt-1 inline-block text-xs bg-medium-bg text-medium-text px-2 py-0.5 rounded">Complementaria</span>
+                                                        @endif
+                                                        @if($child->weight > 0)
+                                                            <span class="mt-1 inline-block text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">{{ $child->weight }}%</span>
+                                                        @endif
+                                                        @if($child->help_text)
+                                                            <p class="mt-1 text-xs text-muted-text">{{ $child->help_text }}</p>
+                                                        @endif
+                                                    </div>
                                                             <div class="flex items-center gap-2 shrink-0">
                                                                 <label class="inline-flex items-center">
                                                                     <input type="radio" name="answers[{{ $child->id }}][question_id]" value="{{ $child->id }}" checked hidden>
@@ -132,12 +149,20 @@
                                             <div class="border rounded-lg p-4 border-border-light bg-card-bg">
                                                 <div class="flex items-start gap-3">
                                                     <div class="flex-1">
-                                                        <p class="text-sm font-medium text-body-text">
-                                                            {{ $question->question_text }}
-                                                            @if($question->weight > 0)
-                                                                <span class="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">{{ $question->weight }}%</span>
-                                                            @endif
-                                                        </p>
+                                                        <div class="flex items-start gap-2">
+                                                            <p class="text-sm font-medium text-body-text">
+                                                                {{ $question->question_text }}
+                                                            </p>
+                                                            <button type="button"
+                                                                    @@click="aiQuestionId = {{ $question->id }}; aiLoading = true; aiOpen = true; fetch('{{ route('ia.explicar') }}', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }, body: JSON.stringify({ question_id: {{ $question->id }} }) }).then(r => r.json()).then(d => { aiText = d.explicacion; aiLoading = false; })"
+                                                                    class="shrink-0 w-5 h-5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition flex items-center justify-center"
+                                                                    title="Explicar con IA">
+                                                                <span class="text-xs font-bold leading-none">?</span>
+                                                            </button>
+                                                        </div>
+                                                        @if($question->weight > 0)
+                                                            <span class="mt-1 inline-block text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">{{ $question->weight }}%</span>
+                                                        @endif
                                                         @if($question->help_text)
                                                             <p class="mt-1 text-xs text-muted-text">{{ $question->help_text }}</p>
                                                         @endif
@@ -205,6 +230,40 @@
                                 </div>
                             </div>
                         </div>
+                        {{-- AI Explanation Modal --}}
+                        <div x-show="aiOpen" class="fixed inset-0 z-50 flex items-center justify-center" style="display: none;" x-cloak>
+                            <div x-show="aiOpen" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="fixed inset-0 bg-black/50 backdrop-blur-sm" @@click="aiOpen = false"></div>
+                            <div x-show="aiOpen" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95 translate-y-4" x-transition:enter-end="opacity-100 scale-100 translate-y-0" class="relative z-10 bg-card-bg border border-border-light rounded-2xl shadow-2xl p-6 max-w-lg w-full mx-4">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                                        <x-icon name="bolt" class="w-5 h-5 text-primary" />
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-bold text-body-text">Explicación con IA</h3>
+                                        <p class="text-xs text-muted-text">Asistente de la Ley 1581</p>
+                                    </div>
+                                </div>
+                                <div class="min-h-[80px]">
+                                    <template x-if="aiLoading">
+                                        <div class="flex items-center justify-center py-8">
+                                            <svg class="animate-spin h-6 w-6 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                        </div>
+                                    </template>
+                                    <template x-if="!aiLoading && aiText">
+                                        <p class="text-sm text-body-text leading-relaxed" x-text="aiText"></p>
+                                    </template>
+                                </div>
+                                <div class="mt-6 flex justify-end">
+                                    <button type="button" @@click="aiOpen = false" class="px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-hover transition">
+                                        Cerrar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
                     </form>
                 </div>
             </div>

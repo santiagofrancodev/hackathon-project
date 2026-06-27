@@ -1,0 +1,72 @@
+<?php
+
+namespace App\Services;
+
+use Illuminate\Support\Facades\Http;
+
+class AIService
+{
+    private string $apiKey;
+
+    private string $model;
+
+    public function __construct()
+    {
+        $this->apiKey = config('services.openai.api_key');
+        $this->model = config('services.openai.model', 'gpt-4o-mini');
+    }
+
+    public function explicarPregunta(string $preguntaTexto): string
+    {
+        $prompt = "Eres un experto en la Ley 1581 de 2012 de Colombia (protección de datos personales). 
+        Explica en lenguaje simple y amigable, en máximo 3 oraciones, qué significa esta pregunta 
+        de autodiagnóstico para una pyme colombiana: \"{$preguntaTexto}\"";
+
+        return $this->call($prompt);
+    }
+
+    public function generarRecomendacionIA(string $preguntaTexto, string $empresa): string
+    {
+        $prompt = "Eres un consultor de protección de datos colombiano. 
+        La empresa '{$empresa}' respondió negativamente a: '{$preguntaTexto}'. 
+        Da una recomendación concreta, práctica y accionable en máximo 2 oraciones.";
+
+        return $this->call($prompt);
+    }
+
+    public function interpretarResultado(int $score, string $empresa): string
+    {
+        $prompt = "Eres un experto en Ley 1581. La empresa '{$empresa}' obtuvo {$score}% 
+        de cumplimiento en su autodiagnóstico de protección de datos. 
+        Interpreta este resultado en 2-3 oraciones: qué significa, cuáles son los riesgos principales 
+        y un mensaje motivador para mejorar.";
+
+        return $this->call($prompt);
+    }
+
+    private function call(string $prompt): string
+    {
+        if (empty($this->apiKey)) {
+            return 'Configure la clave de API en el archivo .env para usar esta función.';
+        }
+
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer '.$this->apiKey,
+            'Content-Type' => 'application/json',
+        ])->timeout(30)->post('https://api.openai.com/v1/chat/completions', [
+            'model' => $this->model,
+            'messages' => [
+                ['role' => 'system', 'content' => 'Eres un asistente experto en la Ley 1581 de Colombia. Respondé siempre en español neutro, claro y conciso.'],
+                ['role' => 'user', 'content' => $prompt],
+            ],
+            'max_tokens' => 300,
+            'temperature' => 0.7,
+        ]);
+
+        if ($response->failed()) {
+            return 'No se pudo generar la respuesta en este momento.';
+        }
+
+        return $response->json('choices.0.message.content', 'No se pudo generar la respuesta.');
+    }
+}
