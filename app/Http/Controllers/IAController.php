@@ -16,6 +16,17 @@ class IAController extends Controller
         ]);
 
         $question = Question::findOrFail($validated['question_id']);
+
+        // Check if user has a pro company for AI features
+        $userCompanies = auth()->user()->companies()->get();
+        $hasPro = $userCompanies->contains(fn ($c) => $c->isPro());
+
+        if (! $hasPro && ! config('cumplia.demo_mode')) {
+            return response()->json([
+                'explicacion' => 'Actualice a plan Pro para acceder a las explicaciones con Inteligencia Artificial.',
+            ]);
+        }
+
         $explicacion = $ai->explicarPregunta($question->question_text);
 
         return response()->json(['explicacion' => $explicacion]);
@@ -30,6 +41,12 @@ class IAController extends Controller
         $assessment = Assessment::with('company')->findOrFail($validated['assessment_id']);
 
         $this->authorizeAccess($assessment);
+
+        if ($assessment->company->isFree()) {
+            return response()->json([
+                'interpretacion' => 'Actualice a plan Pro para acceder a la interpretación de resultados con Inteligencia Artificial.',
+            ]);
+        }
 
         $interpretacion = $ai->interpretarResultado(
             (int) $assessment->score,

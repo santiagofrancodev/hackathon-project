@@ -2,23 +2,24 @@
 
 namespace App\Providers;
 
+use App\Models\Assessment;
+use App\Models\User;
+use App\Policies\AssessmentPolicy;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
-    public function register(): void
-    {
-        //
-    }
+    public function register(): void {}
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
-        //
+        Gate::policy(Assessment::class, AssessmentPolicy::class);
+
+        // Global auth gate helper for Blade
+        Gate::define('admin', fn (User $user) => $user->isAdmin());
+        Gate::define('evaluator', fn (User $user) => $user->isEvaluator());
+        Gate::define('auditor', fn (User $user) => $user->isAuditor());
+        Gate::define('user', fn (User $user) => $user->isUser());
     }
 }

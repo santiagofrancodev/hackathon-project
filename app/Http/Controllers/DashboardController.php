@@ -13,35 +13,84 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        // Companies for filter
-        $companies = Company::where('user_id', $user->id)->get();
+        // ---- Admin: view all ----
+        if ($user->isAdmin()) {
+            $companies = Company::withCount('assessments')->get();
+            $companyIds = $companies->pluck('id');
 
-        // Base query
-        $assessmentsQuery = Assessment::where('user_id', $user->id)
-            ->with('company');
+            $assessmentsQuery = Assessment::with(['company', 'user'])
+                ->whereIn('company_id', $companyIds);
 
-        // Filter by company
-        if ($request->filled('company_id')) {
-            $assessmentsQuery->where('company_id', $request->company_id);
+            if ($request->filled('company_id')) {
+                $assessmentsQuery->where('company_id', $request->company_id);
+            }
+
+            $allAssessments = $assessmentsQuery->latest()->get();
+            $completed = $allAssessments->where('status', 'completed');
+
+            $stats = [
+                'total_assessments' => Assessment::count(),
+                'completed_assessments' => Assessment::where('status', 'completed')->count(),
+                'companies_count' => $companies->count(),
+                'average_score' => Assessment::where('status', 'completed')->avg('score'),
+            ];
+
+            // Show evaluator column for admin
+            $showEvaluator = true;
+
+            // ---- Auditor: assigned companies only ----
+        } elseif ($user->isAuditor()) {
+            $companies = $user->auditedCompanies;
+            $companyIds = $companies->pluck('id');
+
+            $assessmentsQuery = Assessment::with('company')
+                ->whereIn('company_id', $companyIds);
+
+            if ($request->filled('company_id')) {
+                $assessmentsQuery->where('company_id', $request->company_id);
+            }
+
+            $allAssessments = $assessmentsQuery->latest()->get();
+            $completed = $allAssessments->where('status', 'completed');
+
+            $stats = [
+                'total_assessments' => $allAssessments->count(),
+                'completed_assessments' => $completed->count(),
+                'companies_count' => $companies->count(),
+                'average_score' => $completed->avg('score'),
+            ];
+
+            $showEvaluator = false;
+
+            // ---- Evaluator: own companies only ----
+        } else {
+            $companies = Company::where('user_id', $user->id)->get();
+            $companyIds = $companies->pluck('id');
+
+            $assessmentsQuery = Assessment::where('user_id', $user->id)
+                ->with('company');
+
+            if ($request->filled('company_id')) {
+                $assessmentsQuery->where('company_id', $request->company_id);
+            }
+
+            $allAssessments = $assessmentsQuery->latest()->get();
+            $completed = $allAssessments->where('status', 'completed');
+
+            $stats = [
+                'total_assessments' => $allAssessments->count(),
+                'completed_assessments' => $completed->count(),
+                'companies_count' => $companies->count(),
+                'average_score' => $completed->avg('score'),
+            ];
+
+            $showEvaluator = false;
         }
 
-        // Get all assessments ordered by date
-        $allAssessments = $assessmentsQuery->latest()->get();
-
-        // Stats
-        $completed = $allAssessments->where('status', 'completed');
-        $stats = [
-            'total_assessments' => $allAssessments->count(),
-            'completed_assessments' => $completed->count(),
-            'companies_count' => $companies->count(),
-            'average_score' => $completed->avg('score'),
-        ];
-
-        // Score evolution (last 10 completed)
         $scoreHistory = $completed->take(10)->sortByDesc('created_at')->values();
 
         return view('dashboard', compact(
-            'companies', 'allAssessments', 'stats', 'scoreHistory'
+            'companies', 'allAssessments', 'stats', 'scoreHistory', 'showEvaluator'
         ));
     }
 }

@@ -14,6 +14,7 @@ class Company extends Model
         'nit',
         'sector',
         'size',
+        'plan',
     ];
 
     public function user(): BelongsTo
@@ -24,5 +25,15 @@ class Company extends Model
     public function assessments(): HasMany
     {
         return $this->hasMany(Assessment::class);
+    }
+
+    public function isPro(): bool
+    {
+        return $this->plan === 'pro' || config('cumplia.demo_mode');
+    }
+
+    public function isFree(): bool
+    {
+        return ! $this->isPro();
     }
 }

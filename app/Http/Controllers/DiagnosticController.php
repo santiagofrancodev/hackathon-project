@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Company;
 use App\Models\Question;
 use App\Models\Recommendation;
+use App\Services\AIService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -118,6 +119,13 @@ class DiagnosticController extends Controller
         // Generate rule-based recommendations for gaps
         $this->generateRecommendations($assessment);
 
+        // Generate AI summary
+        try {
+            $this->generateAiSummary($assessment);
+        } catch (\Exception $e) {
+            // AI summary is optional — don't block submission
+        }
+
         return redirect()->route('diagnostic.results', $assessment)
             ->with('success', 'Autodiagnóstico completado. Este es tu resultado.');
     }
@@ -209,10 +217,39 @@ class DiagnosticController extends Controller
         return (int) round(min($totalEarnedPercentage, 100));
     }
 
+    private function generateAiSummary(Assessment $assessment): void
+    {
+        $assessment->load('company', 'recommendations');
+
+        // Free plan users don't get AI summary
+        if ($assessment->company->isFree()) {
+            return;
+        }
+
+        $brechas = $assessment->recommendations
+            ->where('origin', 'rule')
+            ->pluck('text')
+            ->implode('; ');
+
+        $ai = app(AIService::class);
+        $sector = $assessment->company->sector ?? 'No especificado';
+
+        $summary = $ai->generarInformeEjecutivo(
+            $assessment->company->name,
+            $sector,
+            (int) $assessment->score,
+            $brechas
+        );
+
+        $assessment->update(['ai_summary' => $summary]);
+    }
+
     private function generateRecommendations(Assessment $assessment): void
     {
+        $assessment->load('company');
         $answers = $assessment->answers()->with('question')->get();
         $recommendationTexts = config('recommendations.by_question', []);
+        $ai = app(AIService::class);
 
         foreach ($answers as $answer) {
             $question = $answer->question;
@@ -228,6 +265,27 @@ class DiagnosticController extends Controller
                 $question->weight >= 8 => 'medium',
                 default => 'low',
             };
+
+            // For high-priority gaps on pro plans, use AI
+            if ($priority === 'high' && $assessment->company->isPro()) {
+                try {
+                    $text = $ai->generarRecomendacionIA(
+                        $question->question_text,
+                        $assessment->company->name
+                    );
+                    Recommendation::create([
+                        'assessment_id' => $assessment->id,
+                        'question_id' => $question->id,
+                        'text' => $text,
+                        'priority' => 'high',
+                        'origin' => 'ai',
+                    ]);
+
+                    continue;
+                } catch (\Exception $e) {
+                    // Fall through to rule-based
+                }
+            }
 
             // Get recommendation text from config, or generate a default
             $text = $recommendationTexts[$question->id] ?? sprintf(
@@ -247,7 +305,23 @@ class DiagnosticController extends Controller
 
     private function authorizeAccess(Assessment $assessment): void
     {
-        if ($assessment->user_id !== Auth::id()) {
+        $user = Auth::user();
+
+        if ($user->isAdmin()) {
+            return;
+        }
+
+        if ($user->isAuditor()) {
+            $hasAccess = $user->auditedCompanies()
+                ->where('company_id', $assessment->company_id)
+                ->exists();
+
+            if ($hasAccess) {
+                return;
+            }
+        }
+
+        if ($assessment->user_id !== $user->id) {
             abort(403, 'No tienes permiso para acceder a esta evaluación.');
         }
     }

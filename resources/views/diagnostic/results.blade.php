@@ -49,49 +49,63 @@
                         </div>
                     </div>
 
-                    {{-- AI Interpretation --}}
-                    <div class="mt-6 pt-4 border-t border-border-light">
-                        <button type="button"
-                                @@click="aiLoading = true; aiOpen = true; fetch('{{ route('ia.interpretar') }}', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }, body: JSON.stringify({ assessment_id: {{ $assessment->id }} }) }).then(r => r.json()).then(d => { aiText = d.interpretacion; aiLoading = false; })"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary text-sm font-medium rounded-lg hover:bg-primary/20 transition">
-                            <x-icon name="bolt" class="w-4 h-4" />
-                            Interpretar resultados con IA
-                        </button>
-
-                        {{-- AI Modal --}}
-                        <div x-show="aiOpen" class="fixed inset-0 z-50 flex items-center justify-center" style="display: none;" x-cloak>
-                            <div x-show="aiOpen" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="fixed inset-0 bg-black/50 backdrop-blur-sm" @@click="aiOpen = false"></div>
-                            <div x-show="aiOpen" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95 translate-y-4" x-transition:enter-end="opacity-100 scale-100 translate-y-0" class="relative z-10 bg-card-bg border border-border-light rounded-2xl shadow-2xl p-6 max-w-lg w-full mx-4">
-                                <div class="flex items-center gap-3 mb-4">
-                                    <div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
-                                        <x-icon name="bolt" class="w-5 h-5 text-primary" />
-                                    </div>
-                                    <div>
-                                        <h3 class="text-lg font-bold text-body-text">Interpretación con IA</h3>
-                                        <p class="text-xs text-muted-text">Análisis del resultado de autodiagnóstico</p>
-                                    </div>
+                    {{-- AI Summary (inline, persists) --}}
+                    @if($assessment->ai_summary)
+                        <div class="mt-6 pt-4 border-t border-border-light text-left">
+                            <div class="flex items-center gap-2 mb-3">
+                                <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                                    <x-icon name="bolt" class="w-4 h-4 text-primary" />
                                 </div>
-                                <div class="min-h-[60px]">
-                                    <template x-if="aiLoading">
-                                        <div class="flex items-center justify-center py-6">
-                                            <svg class="animate-spin h-6 w-6 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                            </svg>
+                                <h4 class="text-sm font-bold text-body-text">Análisis IA</h4>
+                            </div>
+                            <div class="text-sm text-muted-text leading-relaxed space-y-2">
+                                @foreach(explode("\n\n", $assessment->ai_summary) as $paragraph)
+                                    <p>{{ $paragraph }}</p>
+                                @endforeach
+                            </div>
+                        </div>
+                    @else
+                        {{-- Fallback: on-demand IA interpretation --}}
+                        <div class="mt-6 pt-4 border-t border-border-light"
+                             x-data="{ aiLoading: false, aiText: '', aiOpen: false }">
+                            <button type="button"
+                                    @@click="aiLoading = true; aiOpen = true; fetch('{{ route('ia.interpretar') }}', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }, body: JSON.stringify({ assessment_id: {{ $assessment->id }} }) }).then(r => r.json()).then(d => { aiText = d.interpretacion; aiLoading = false; })"
+                                    class="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary text-sm font-medium rounded-lg hover:bg-primary/20 transition">
+                                <x-icon name="bolt" class="w-4 h-4" />
+                                Interpretar resultados con IA
+                            </button>
+                            <div x-show="aiOpen" class="fixed inset-0 z-50 flex items-center justify-center" style="display: none;" x-cloak>
+                                <div x-show="aiOpen" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="fixed inset-0 bg-black/50 backdrop-blur-sm" @@click="aiOpen = false"></div>
+                                <div x-show="aiOpen" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95 translate-y-4" x-transition:enter-end="opacity-100 scale-100 translate-y-0" class="relative z-10 bg-card-bg border border-border-light rounded-2xl shadow-2xl p-6 max-w-lg w-full mx-4">
+                                    <div class="flex items-center gap-3 mb-4">
+                                        <div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                                            <x-icon name="bolt" class="w-5 h-5 text-primary" />
                                         </div>
-                                    </template>
-                                    <template x-if="!aiLoading && aiText">
-                                        <p class="text-sm text-body-text leading-relaxed" x-text="aiText"></p>
-                                    </template>
-                                </div>
-                                <div class="mt-6 flex justify-end">
-                                    <button type="button" @@click="aiOpen = false" class="px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-hover transition">
-                                        Cerrar
-                                    </button>
+                                        <div>
+                                            <h3 class="text-lg font-bold text-body-text">Interpretación con IA</h3>
+                                            <p class="text-xs text-muted-text">Análisis del resultado</p>
+                                        </div>
+                                    </div>
+                                    <div class="min-h-[60px]">
+                                        <template x-if="aiLoading">
+                                            <div class="flex items-center justify-center py-6">
+                                                <svg class="animate-spin h-6 w-6 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                            </div>
+                                        </template>
+                                        <template x-if="!aiLoading && aiText">
+                                            <p class="text-sm text-body-text leading-relaxed" x-text="aiText"></p>
+                                        </template>
+                                    </div>
+                                    <div class="mt-6 flex justify-end">
+                                        <button type="button" @@click="aiOpen = false" class="px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-hover transition">Cerrar</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    @endif
                 </div>
             </div>
 

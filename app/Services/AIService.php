@@ -44,6 +44,21 @@ class AIService
         return $this->call($prompt);
     }
 
+    public function generarInformeEjecutivo(string $empresa, string $sector, int $score, string $brechas): string
+    {
+        $prompt = "Eres consultor experto en Ley 1581 de Colombia. 
+        La empresa '{$empresa}' (sector: {$sector}) 
+        obtuvo {$score}% de cumplimiento. 
+        Brechas principales: {$brechas}.
+        Genera un informe ejecutivo en 4 párrafos:
+        1. Diagnóstico general del nivel de cumplimiento
+        2. Principales riesgos legales identificados
+        3. Prioridades de acción inmediata
+        4. Perspectiva de mejora y próximos pasos";
+
+        return $this->call($prompt);
+    }
+
     private function call(string $prompt): string
     {
         if (empty($this->apiKey)) {

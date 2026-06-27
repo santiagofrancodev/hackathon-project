@@ -110,6 +110,9 @@
                             <thead class="bg-bg-page">
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-muted-text uppercase">Empresa</th>
+                                    @if($showEvaluator)
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-text uppercase">Evaluador</th>
+                                    @endif
                                     <th class="px-6 py-3 text-left text-xs font-medium text-muted-text uppercase">Fecha</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-muted-text uppercase">Estado</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-muted-text uppercase">Puntaje</th>
@@ -122,6 +125,11 @@
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <p class="text-sm font-medium text-body-text">{{ $assessment->company->name }}</p>
                                         </td>
+                                        @if($showEvaluator)
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <p class="text-sm text-muted-text">{{ $assessment->user->name }}</p>
+                                            </td>
+                                        @endif
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <p class="text-sm text-muted-text">{{ $assessment->created_at->format('d/m/Y') }}</p>
                                             <p class="text-xs text-muted-text/70">{{ $assessment->created_at->format('H:i') }}</p>

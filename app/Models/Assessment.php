@@ -13,6 +13,7 @@ class Assessment extends Model
         'user_id',
         'status',
         'score',
+        'ai_summary',
     ];
 
     public function company(): BelongsTo
