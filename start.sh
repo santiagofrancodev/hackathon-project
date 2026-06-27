@@ -2,7 +2,7 @@
 
 set -e
 
-__DIR__="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+__DIR__="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Ensure SQLite database exists
 touch "${__DIR__}/database/database.sqlite"
